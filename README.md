@@ -9,6 +9,10 @@
 
 Foundation.OpenCL is a high-performance, modern OpenCL binding for .NET that combines the full power of OpenCL 3.0 with idiomatic C# design patterns. Built from the ground up for performance and reliability.
 
+### Foundation.OpenCL.Extensions.Intel 
+[![NuGet](https://img.shields.io/nuget/v/Foundation.OpenCL.Extensions.Intel.svg)](https://www.nuget.org/packages/Foundation.OpenCL.Extensions.Intel)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+
 ## 🚀 Why Foundation.OpenCL?
 
 ### **Zero-Cost Abstractions**
