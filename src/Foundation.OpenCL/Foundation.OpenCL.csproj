@@ -8,9 +8,13 @@
 		<Description>OpenCL binding for DotNet featuring idiomatic C# APIs with zero cost abstractions.</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>OpenCL;GPGPU;HPC;C#;.NET;Bindings</PackageTags>
+		<Copyright>Copyright (c) 2025 Samuel Alexandre Vidal.</Copyright>
 		<PackageProjectUrl>https://github.com/samuel-vidal/Foundation.OpenCL</PackageProjectUrl>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReleaseNotes>Initial Release.</PackageReleaseNotes>
+		<RepositoryUrl>https://github.com/samuel-vidal/Foundation.OpenCL.git</RepositoryUrl>
+		<Company>Samuel Alexandre Vidal</Company>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />
