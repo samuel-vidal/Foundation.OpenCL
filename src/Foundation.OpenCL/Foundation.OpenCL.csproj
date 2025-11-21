@@ -5,12 +5,17 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Description>OpenCL binding for DotNet featuring idiomatic C# APIs with zero cost abstractions.</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>OpenCL;GPGPU;HPC;C#;.NET;Bindings</PackageTags>
 		<PackageProjectUrl>https://github.com/samuel-vidal/Foundation.OpenCL</PackageProjectUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Title>Foundation.OpenCL</Title>
+		<Authors>Samuel Alexandre Vidal</Authors>
+		<Copyright>Copyright (c) 2025 Samuel Alexandre Vidal</Copyright>
+		<RepositoryUrl>https://github.com/samuel-vidal/Foundation.OpenCL.git</RepositoryUrl>
+		<PackageReleaseNotes>First Release.</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />

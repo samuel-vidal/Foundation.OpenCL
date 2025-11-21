@@ -1,15 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>OpenCL binding for DotNet featuring idiomatic C# APIs with zero cost abstractions.</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>OpenCL;GPGPU;HPC;C#;.NET;Bindings;Intel Extensions;USM</PackageTags>
+		<PackageProjectUrl>https://github.com/samuel-vidal/Foundation.OpenCL</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Title>Foundation.OpenCL.Extensions.Intel</Title>
+		<Authors>Samuel Alexandre Vidal</Authors>
+		<Copyright>Copyright (c) 2025 Samuel Alexandre Vidal</Copyright>
+		<RepositoryUrl>https://github.com/samuel-vidal/Foundation.OpenCL.git</RepositoryUrl>
+		<PackageReleaseNotes>First Release.</PackageReleaseNotes>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Foundation.OpenCL\Foundation.OpenCL.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Foundation.OpenCL\Foundation.OpenCL.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 </Project>
