@@ -173,16 +173,19 @@ Typical result: 18ms on Intel Arc Pro B60
 ### Package Manager
 ```bash
 Install-Package Foundation.OpenCL
+Install-Package Foundation.OpenCL.Extensions.Intel
 ```
 
 ### .NET CLI
 ```bash
 dotnet add package Foundation.OpenCL
+dotnet add package Foundation.OpenCL.Extensions.Intel
 ```
 
 ### Project Reference
 ```xml
 <PackageReference Include="Foundation.OpenCL" Version="1.0.1" />
+<PackageReference Include="Foundation.OpenCL.Extensions.Intel" Version="1.0.1" />
 ```
 
 ## 🔧 Requirements
