@@ -182,7 +182,7 @@ dotnet add package Foundation.OpenCL
 
 ### Project Reference
 ```xml
-<PackageReference Include="Foundation.OpenCL" Version="1.0.0" />
+<PackageReference Include="Foundation.OpenCL" Version="1.0.1" />
 ```
 
 ## 🔧 Requirements
