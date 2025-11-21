@@ -165,7 +165,7 @@ using var buffer = context.CreateBuffer(MemFlags.ReadWrite, size);
 
 ### Kernel Chaining Benchmark
 
-100 sequential kernels gemm 32x32 with event dependencies
+100 sequential 32x32 gemm kernels with event dependencies
 Typical result: 18ms on Intel Arc Pro B60
 
 ## 🛠 Installation
