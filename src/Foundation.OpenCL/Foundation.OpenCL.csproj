@@ -16,6 +16,7 @@
 		<Copyright>Copyright (c) 2025 Samuel Alexandre Vidal</Copyright>
 		<RepositoryUrl>https://github.com/samuel-vidal/Foundation.OpenCL.git</RepositoryUrl>
 		<PackageReleaseNotes>First Release.</PackageReleaseNotes>
+		<Version>1.0.1</Version>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />

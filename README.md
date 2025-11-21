@@ -4,7 +4,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Foundation.OpenCL.svg)](https://www.nuget.org/packages/Foundation.OpenCL)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
-[![.NET](https://github.com/your-username/Foundation.OpenCL/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/Foundation.OpenCL/actions)
+[![.NET](https://github.com/your-username/Foundation.OpenCL/actions/workflows/ci.yml/badge.svg)](https://github.com/samuel-vidal/Foundation.OpenCL/actions)
 
 > **Performance Density Matters** - 100 kernel chain executes in **18ms**
 
