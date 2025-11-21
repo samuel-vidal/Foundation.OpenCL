@@ -1,0 +1,7 @@
+/tests/Iridium.OpenCL.Tests/bin
+/tests/Iridium.OpenCL.Tests/obj
+obj
+.vs
+bin
+/src/Iridium.OpenCL/*.user
+/*.user
