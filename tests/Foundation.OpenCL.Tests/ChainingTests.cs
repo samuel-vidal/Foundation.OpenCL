@@ -13,7 +13,7 @@ namespace Foundation.OpenCL.Tests
     [Category("Hardware")]
     public unsafe class ChainingTests
     {
-        [TestCase(2, 1e-3f)]
+        [TestCase(2, 5e-4f)]
         [TestCase(8, 1e-3f)]
         [TestCase(100, 1e-2f)]
         public void Strategy1(int iterations, float tolerance)
@@ -127,7 +127,7 @@ namespace Foundation.OpenCL.Tests
             manager.Dispose();
         }
 
-        [TestCase(2, 1e-3f)]
+        [TestCase(2, 5e-4f)]
         [TestCase(8, 1e-3f)]
         [TestCase(100, 1e-2f)]
         public void Strategy2(int iterations, float tolerance)
@@ -239,7 +239,7 @@ namespace Foundation.OpenCL.Tests
             manager.Dispose();
         }
 
-        [TestCase(2, 1e-3f)]
+        [TestCase(2, 5e-4f)]
         [TestCase(8, 1e-3f)]
         [TestCase(100, 1e-2f)]
         public void Strategy3(int iterations, float tolerance)

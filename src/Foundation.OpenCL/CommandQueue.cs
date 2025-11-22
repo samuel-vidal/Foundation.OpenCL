@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Foundation.OpenCL
@@ -330,8 +331,8 @@ namespace Foundation.OpenCL
 
             for (var i = 0; i < 3; i++)
             {
-                srcOriginPtr[i] = i < targetOrigin.Length ? targetOrigin[i] : 0;
-                dstOriginPtr[i] = i < sourceOrigin.Length ? sourceOrigin[i] : 0;
+                dstOriginPtr[i] = i < targetOrigin.Length ? targetOrigin[i] : 0;
+                srcOriginPtr[i] = i < sourceOrigin.Length ? sourceOrigin[i] : 0;
                 regionPtr[i] = i < region.Length ? region[i] : 1;
             }
 
@@ -867,6 +868,7 @@ namespace Foundation.OpenCL
         public readonly ReadOnlySpan<nuint> Dimension;
         public readonly ReadOnlySpan<nuint> Stride;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SubTensorLayout(
             ReadOnlySpan<nuint> origin,
             ReadOnlySpan<nuint> dimension,
@@ -881,6 +883,7 @@ namespace Foundation.OpenCL
 
         public int Rank => Dimension.Length;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Validate()
         {
             if (Origin.Length != Rank) throw new ArgumentException("Size mismatch Origin.Length != Dimension.Length"); 
@@ -890,7 +893,7 @@ namespace Foundation.OpenCL
 
             for (int i = 1; i < Rank; i++)
             {
-                if (Dimension[i] == 0) throw new ArgumentException($"Dimension[{i}] == 1");
+                if (Dimension[i] == 0) throw new ArgumentException($"Dimension[{i}] == 0");
             }
 
             for (int i = 1; i < Rank; i++)
@@ -902,6 +905,7 @@ namespace Foundation.OpenCL
 
     public static unsafe class BufferRectangularExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Event EnqueueReadBufferRect<T>(
             this CommandQueue queue,
             Buffer memObject,
@@ -966,6 +970,7 @@ namespace Foundation.OpenCL
                 waitEvents);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Event EnqueueWriteBufferRect<T>(
             this CommandQueue queue,
             Buffer memObject,
@@ -998,6 +1003,7 @@ namespace Foundation.OpenCL
                 waitEvents);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void EnqueueWriteBufferRectBlocking<T>(
             this CommandQueue queue,
             Buffer memObject,
@@ -1030,6 +1036,7 @@ namespace Foundation.OpenCL
                 waitEvents);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Event EnqueueCopyBufferRect<T>(
             this CommandQueue queue,
             Buffer targetBuffer,
