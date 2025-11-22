@@ -9,6 +9,10 @@
 
 Foundation.OpenCL is a high-performance, modern OpenCL binding for .NET that combines the full power of OpenCL 3.0 with idiomatic C# design patterns. Built from the ground up for performance and reliability.
 
+### Foundation.OpenCL.Extensions.Intel 
+[![NuGet](https://img.shields.io/nuget/v/Foundation.OpenCL.Extensions.Intel.svg)](https://www.nuget.org/packages/Foundation.OpenCL.Extensions.Intel)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+
 ## 🚀 Why Foundation.OpenCL?
 
 ### **Zero-Cost Abstractions**
@@ -161,7 +165,7 @@ using var buffer = context.CreateBuffer(MemFlags.ReadWrite, size);
 
 ### Kernel Chaining Benchmark
 
-100 sequential kernels gemm 32x32 with event dependencies
+100 sequential 32x32 gemm kernels with event dependencies
 Typical result: 18ms on Intel Arc Pro B60
 
 ## 🛠 Installation
@@ -169,16 +173,19 @@ Typical result: 18ms on Intel Arc Pro B60
 ### Package Manager
 ```bash
 Install-Package Foundation.OpenCL
+Install-Package Foundation.OpenCL.Extensions.Intel
 ```
 
 ### .NET CLI
 ```bash
 dotnet add package Foundation.OpenCL
+dotnet add package Foundation.OpenCL.Extensions.Intel
 ```
 
 ### Project Reference
 ```xml
-<PackageReference Include="Foundation.OpenCL" Version="1.0.0" />
+<PackageReference Include="Foundation.OpenCL" Version="1.0.1" />
+<PackageReference Include="Foundation.OpenCL.Extensions.Intel" Version="1.0.1" />
 ```
 
 ## 🔧 Requirements
