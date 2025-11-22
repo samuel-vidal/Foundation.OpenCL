@@ -13,8 +13,236 @@ namespace Foundation.OpenCL.Tests
     [Category("Hardware")]
     public unsafe class ChainingTests
     {
-        [Test]
-        public void Strategy1()
+        [TestCase(2, 1e-3f)]
+        [TestCase(8, 1e-3f)]
+        [TestCase(100, 1e-2f)]
+        public void Strategy1(int iterations, float tolerance)
+        {
+            var manager = new TensorMemoryManager();
+            var rand = new Random(42);
+
+            var a = manager.Create<Half>([32, 32]);
+            var b = manager.Create<Half>([32, 32]);
+            var p = manager.Create<Half>([32, 32]);
+            var q = manager.Create<Half>([32, 32]);
+            var result_actual = manager.Create<Half>([32, 32]);
+
+            RandomOrthogonal(rand, a);
+            RandomOrthogonal(rand, p);
+            RandomOrthogonal(rand, q);
+
+            var platforms = Platform.GetPlatforms();
+            var devices = platforms[0].GetDevices(DeviceType.Gpu);
+            var device = devices[0];
+            var context = Context.CreateContext([device]);
+            var queue = context.CreateCommandQueue(
+                device,
+                CommandQueueProperty.OutOfOrderExecModeEnable,
+                CommandQueueProperty.OnDevice);
+
+            var a_buffer = context.CreateBuffer(MemFlags.ReadWrite | MemFlags.CopyHostPtr, a.ByteSize, a.Rep);
+            var b_buffer = context.CreateBuffer(MemFlags.ReadWrite, b.ByteSize);
+            var p_buffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr, p.ByteSize, p.Rep);
+            var q_buffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr, q.ByteSize, q.Rep);
+
+            var kernelSource = GetResource("Foundation.OpenCL.Tests.Kernels.basic_gemm_square.cl");
+            using var program = context.CreateWithSource(kernelSource);
+
+            try
+            {
+                program.Build(
+                    [device],
+                    "-cl-std=CL3.0",
+                    () =>
+                    {
+                        Console.WriteLine(
+                            $"Program built successfully for device: {device.GetStringInfo(DeviceInfo.Name)}");
+                    });
+            }
+            catch
+            {
+                var log = program.GetBuildLog(device);
+                Console.WriteLine(log);
+                throw;
+            }
+
+            var kernel0 = program.CreateKernel("basic_gemm_square");
+            kernel0.SetArgBuffer(0, b_buffer);
+            kernel0.SetArgBuffer(1, a_buffer);
+            kernel0.SetArgBuffer(2, q_buffer);
+
+            var kernel1 = program.CreateKernel("basic_gemm_square");
+            kernel1.SetArgBuffer(0, a_buffer);
+            kernel1.SetArgBuffer(1, b_buffer);
+            kernel1.SetArgBuffer(2, p_buffer);
+
+
+            var eventList = new List<Event>();
+
+            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]);
+            eventList.Add(completion);
+            completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+            eventList.Add(completion);
+
+            Event.Wait(completion);
+            var sw = Stopwatch.StartNew();
+
+            for (var i = 2; i < iterations; i+=2)
+            {
+                completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [completion]);
+                eventList.Add(completion);
+                completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+                eventList.Add(completion);
+            }
+
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
+
+            Console.WriteLine($"took {sw.Elapsed}");
+
+            queue.Flush();
+            queue.Finish();
+
+            foreach (var ev in eventList) ev.Dispose();
+
+            kernel0.Dispose();
+            kernel1.Dispose();
+
+            a_buffer.Dispose();
+            b_buffer.Dispose();
+            p_buffer.Dispose();
+            q_buffer.Dispose();
+            queue.Dispose();
+            context.Dispose();
+
+            Reference(a, b, p, q, iterations);
+
+            for (var i = 0; i < 32; i++)
+            {
+                for (var j = 0; j < 32; j++)
+                {
+                    Assert.That(Abs((float)result_actual[i, j] - (float)a[i, j]) < tolerance, $"expected[{i},{j}] = {a[i, j]}, actual[{i},{j}] = {result_actual[i, j]}");
+                }
+            }
+
+            manager.Dispose();
+        }
+
+        [TestCase(2, 1e-3f)]
+        [TestCase(8, 1e-3f)]
+        [TestCase(100, 1e-2f)]
+        public void Strategy2(int iterations, float tolerance)
+        {
+            var manager = new TensorMemoryManager();
+            var rand = new Random(42);
+
+            var a = manager.Create<Half>([32, 32]);
+            var b = manager.Create<Half>([32, 32]);
+            var p = manager.Create<Half>([32, 32]);
+            var q = manager.Create<Half>([32, 32]);
+            var result_actual = manager.Create<Half>([32, 32]);
+
+            RandomOrthogonal(rand, a);
+            RandomOrthogonal(rand, p);
+            RandomOrthogonal(rand, q);
+
+            var platforms = Platform.GetPlatforms();
+            var devices = platforms[0].GetDevices(DeviceType.Gpu);
+            var device = devices[0];
+            var context = Context.CreateContext([device]);
+            var queue = context.CreateCommandQueue(
+                device,
+                CommandQueueProperty.OutOfOrderExecModeEnable);
+
+            var a_buffer = context.CreateBuffer(MemFlags.ReadWrite | MemFlags.CopyHostPtr, a.ByteSize, a.Rep);
+            var b_buffer = context.CreateBuffer(MemFlags.ReadWrite, b.ByteSize);
+            var p_buffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr, p.ByteSize, p.Rep);
+            var q_buffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr, q.ByteSize, q.Rep);
+
+            var kernelSource = GetResource("Foundation.OpenCL.Tests.Kernels.basic_gemm_square.cl");
+            using var program = context.CreateWithSource(kernelSource);
+
+            try
+            {
+                program.Build(
+                    [device],
+                    "-cl-std=CL3.0",
+                    () =>
+                    {
+                        Console.WriteLine(
+                            $"Program built successfully for device: {device.GetStringInfo(DeviceInfo.Name)}");
+                    });
+            }
+            catch
+            {
+                var log = program.GetBuildLog(device);
+                Console.WriteLine(log);
+                throw;
+            }
+
+            var kernel0 = program.CreateKernel("basic_gemm_square");
+            kernel0.SetArgBuffer(0, b_buffer);
+            kernel0.SetArgBuffer(1, a_buffer);
+            kernel0.SetArgBuffer(2, q_buffer);
+
+            var kernel1 = program.CreateKernel("basic_gemm_square");
+            kernel1.SetArgBuffer(0, a_buffer);
+            kernel1.SetArgBuffer(1, b_buffer);
+            kernel1.SetArgBuffer(2, p_buffer);
+
+            var eventList = new List<Event>();
+
+            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]);
+            eventList.Add(completion);
+            completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+            eventList.Add(completion);
+
+            Event.Wait(completion);
+            var sw = Stopwatch.StartNew();
+
+            for (var i = 2; i < iterations; i+=2)
+            {
+                completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [completion]);
+                eventList.Add(completion);
+                completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+                eventList.Add(completion);
+            }
+
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
+
+            Console.WriteLine($"took {sw.Elapsed}");
+
+            queue.Flush();
+            queue.Finish();
+
+            foreach (var ev in eventList) ev.Dispose();
+
+            kernel0.Dispose();
+            kernel1.Dispose();
+
+            a_buffer.Dispose();
+            b_buffer.Dispose();
+            p_buffer.Dispose();
+            q_buffer.Dispose();
+            queue.Dispose();
+            context.Dispose();
+
+            Reference(a, b, p, q, iterations);
+
+            for (var i = 0; i < 32; i++)
+            {
+                for (var j = 0; j < 32; j++)
+                {
+                    Assert.That(Abs((float)result_actual[i, j] - (float)a[i, j]) < tolerance, $"expected[{i},{j}] = {a[i, j]}, actual[{i},{j}] = {result_actual[i, j]}");
+                }
+            }
+
+            manager.Dispose();
+        }
+
+        [TestCase(2, 1e-3f)]
+        [TestCase(8, 1e-3f)]
+        [TestCase(100, 1e-2f)]
+        public void Strategy3(int iterations, float tolerance)
         {
             var manager = new TensorMemoryManager();
             var rand = new Random(42);
@@ -71,23 +299,21 @@ namespace Foundation.OpenCL.Tests
             kernel1.SetArgBuffer(1, b_buffer);
             kernel1.SetArgBuffer(2, p_buffer);
 
-            var sw = Stopwatch.StartNew();
-
             var eventList = new List<Event>();
 
-            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]);
-            eventList.Add(completion);
-            completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
-            eventList.Add(completion);
-            for (var i = 1; i < 50; i++)
+            eventList.Add(queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]));
+            eventList.Add(queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32]));
+
+            Event.Wait(eventList[^1]);
+            var sw = Stopwatch.StartNew();
+
+            for (var i = 2; i < iterations; i += 2)
             {
-                completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [completion]);
-                eventList.Add(completion);
-                completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
-                eventList.Add(completion);
+                eventList.Add(queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]));
+                eventList.Add(queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32]));
             }
 
-            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep);
 
             Console.WriteLine($"took {sw.Elapsed}");
 
@@ -106,13 +332,13 @@ namespace Foundation.OpenCL.Tests
             queue.Dispose();
             context.Dispose();
 
-            Reference(a, b, p, q);
+            Reference(a, b, p, q, iterations);
 
             for (var i = 0; i < 32; i++)
             {
                 for (var j = 0; j < 32; j++)
                 {
-                    Assert.That(Half.Abs(result_actual[i, j] - a[i, j]) < (Half) 1e-2, $"expected[{i},{j}] = {a[i,j]}, actual[{i},{j}] = {result_actual[i, j]}");
+                    Assert.That(Abs((float)result_actual[i, j] - (float)a[i, j]) < tolerance, $"expected[{i},{j}] = {a[i, j]}, actual[{i},{j}] = {result_actual[i, j]}");
                 }
             }
 
@@ -123,10 +349,11 @@ namespace Foundation.OpenCL.Tests
             Tensor<T> a,
             Tensor<T> b,
             Tensor<T> p,
-            Tensor<T> q)
+            Tensor<T> q,
+            int iterations)
             where T : unmanaged, INumber<T>
         {
-            for (var i = 0; i < 50; i++)
+            for (var i = 0; i < iterations; i+=2)
             {
                 Mult(b, a, q);
                 Mult(a, b, p);

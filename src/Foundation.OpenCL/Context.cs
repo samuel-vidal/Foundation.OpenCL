@@ -133,20 +133,21 @@ namespace Foundation.OpenCL
 
         public CommandQueue CreateCommandQueue(
             Device device,
-            params ReadOnlySpan<CommandQueueConfig> properties)
+            params ReadOnlySpan<CommandQueueProperty> properties)
         {
             var propArray = stackalloc ulong[properties.Length * 2 + 1];
-            for (int i = 0, pos = 0; i < properties.Length; i++)
+
+            for(int i = 0, pos = 0; i < properties.Length; i ++)
             {
-                propArray[pos++] = (ulong)properties[i].Property;
-                propArray[pos++] = properties[i].Value;
-                propArray[pos] = 0;         // intentional
+                propArray[pos++] = (ulong)CommandQueueInfo.Properties;
+                propArray[pos++] = (ulong)properties[i];
+                propArray[pos] = 0;
             }
 
             var handle = OpenCLNative.CreateCommandQueueWithProperties(
                 Handle,
                 device.Handle,
-                propArray,
+                NullIfEmpty(properties, propArray),
                 out var errCodeRet);
 
             errCodeRet.ThrowIfUnsuccessful();

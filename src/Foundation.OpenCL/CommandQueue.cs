@@ -16,6 +16,7 @@ namespace Foundation.OpenCL
         PropertiesArray = 0x1098,          // CL_QUEUE_PROPERTIES_ARRAY
     }
 
+    [Flags]
     public enum CommandQueueProperty : ulong
     {
         None = 0x0,
@@ -45,12 +46,6 @@ namespace Foundation.OpenCL
     }
 
     #endregion
-
-    public readonly struct CommandQueueConfig(CommandQueueProperty property, ulong value)
-    {
-        public CommandQueueProperty Property { get; } = property;
-        public ulong Value { get; } = value;
-    }
 
     public sealed unsafe class CommandQueue(Handle<CommandQueue> handle)
         : BaseObject<CommandQueue, CommandQueueInfo>(handle), IReify<CommandQueue>
