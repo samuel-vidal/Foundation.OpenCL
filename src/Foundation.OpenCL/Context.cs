@@ -430,7 +430,7 @@ namespace Foundation.OpenCL
             => OpenCLNative.GetContextInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
         protected override void RetainHook() => OpenCLNative.RetainContext(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseContext(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<Context> tmpHandle) => OpenCLNative.ReleaseContext(tmpHandle).ThrowIfUnsuccessful();
 
         public static Context Reify(Handle<Context> handle) => new(handle);
     }

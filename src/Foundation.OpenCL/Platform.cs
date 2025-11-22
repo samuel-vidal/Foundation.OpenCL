@@ -60,7 +60,7 @@ namespace Foundation.OpenCL
             => OpenCLNative.GetPlatformInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
         protected override void RetainHook() { }
-        protected override void ReleaseHook() { }
+        protected override void ReleaseHook(Handle<Platform> _) { }
         public static Platform Reify(Handle<Platform> handle) => new(handle);
     }
 }

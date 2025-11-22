@@ -683,7 +683,7 @@ namespace Foundation.OpenCL
             => OpenCLNative.GetCommandQueueInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
         protected override void RetainHook() => OpenCLNative.RetainCommandQueue(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseCommandQueue(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<CommandQueue> tmpHandle) => OpenCLNative.ReleaseCommandQueue(tmpHandle).ThrowIfUnsuccessful();
 
         public static CommandQueue Reify(Handle<CommandQueue> handle) => new(handle);
     }

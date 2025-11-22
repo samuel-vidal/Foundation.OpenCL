@@ -47,8 +47,9 @@ namespace Foundation.OpenCL
 
         public TSelf Retain()
         {
+            var tmpHandle = Handle;
             RetainHook();
-            return TSelf.Reify(Handle);
+            return TSelf.Reify(tmpHandle);
         }
 
         // The internal managed reference count, initialized to 1 for the object's creator.
@@ -61,37 +62,34 @@ namespace Foundation.OpenCL
         /// </summary>
         public void Dispose()
         {
-            Dispose(false);
+            Dispose(true);
         }
 
-        private void Dispose(bool finalizer)
+        private void Dispose(bool disposing)
         {
             // Decrement the managed reference count. If the result is greater than 0,
             // another managed owner still holds a reference, so we stop here.
-            var currentLocalRefCount = Interlocked.Decrement(ref localReferenceCount);
-
-            if (currentLocalRefCount == 0)
+            if (Interlocked.CompareExchange(ref localReferenceCount, 0, 1) == 1)
             {
                 // 1. Fire disposal event
-                if (!finalizer)
+                if (disposing)
                 {
                     var tmp = OnDispose;
                     if (tmp != null) try { tmp(); } catch { }
                 }
 
-                // 2. Call the native API release hook (clReleaseXXX)
-                ReleaseHook();
+                var tmpHandle = Handle;                     // 2. Capture the current handle
+                handle = Handle<TTag>.Null;                 // 3. Immediately invalidate the instance handle
+                Interlocked.MemoryBarrier();                // 4. Memory barrier
+                ReleaseHook(tmpHandle);                     // 5. Release the native resource using the captured handle
 
-                // 3. Mark the handle as null to indicate disposal
-                handle = Handle<TTag>.Null;
-
-                // 4. Prevent finalizer from running, as cleanup was performed.
+                // 5. Prevent finalizer from running, as cleanup was performed.
                 GC.SuppressFinalize(this);
 
                 return;
             }
 
-            localReferenceCount = 0;
+            if (disposing) throw new ObjectDisposedException(nameof(TSelf));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,12 +104,12 @@ namespace Foundation.OpenCL
 
         public event Action? OnDispose;
 
-        protected abstract void RetainHook();           // calls the Native API
-        protected abstract void ReleaseHook();          // calls the Native API
+        protected abstract void RetainHook();                                   // calls the Native API
+        protected abstract void ReleaseHook(Handle<TTag> tmpHandle);            // calls the Native API
 
         ~BaseObject()
         {
-            Dispose(true);
+            Dispose(false);
         }
     }
 

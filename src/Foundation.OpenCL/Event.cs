@@ -192,7 +192,7 @@ namespace Foundation.OpenCL
 
         protected override void RetainHook() => OpenCLNative.RetainEvent(Handle).ThrowIfUnsuccessful();
 
-        protected override void ReleaseHook()
+        protected override void ReleaseHook(Handle<Event> tmpHandle)
         {
             lock (mutex)
             {
@@ -206,7 +206,7 @@ namespace Foundation.OpenCL
                 RemoveCallbackAux(CommandExecutionStatus.Submitted);
             }
 
-            OpenCLNative.ReleaseEvent(Handle).ThrowIfUnsuccessful();
+            OpenCLNative.ReleaseEvent(tmpHandle).ThrowIfUnsuccessful();
         }
 
         protected override void GetInfo(EventInfo paramName, nuint paramValueSize, void* paramValue, out nuint paramValueSizeRet)

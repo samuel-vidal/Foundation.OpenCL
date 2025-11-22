@@ -180,7 +180,7 @@ namespace Foundation.OpenCL
         }
 
         protected override void RetainHook() => OpenCLNative.RetainKernel(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseKernel(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<Kernel> tmpHandle) => OpenCLNative.ReleaseKernel(tmpHandle).ThrowIfUnsuccessful();
 
         protected override void GetInfo(KernelInfo paramName, nuint paramValueSize, void* paramValue, out nuint paramValueSizeRet)
             => OpenCLNative.GetKernelInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();

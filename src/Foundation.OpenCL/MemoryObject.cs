@@ -128,7 +128,7 @@ namespace Foundation.OpenCL
         }
 
         protected override void RetainHook() => OpenCLNative.RetainMemObject(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseMemObject(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<MemoryObject> tmpHandle) => OpenCLNative.ReleaseMemObject(tmpHandle).ThrowIfUnsuccessful();
 
         protected override void GetInfo(MemInfo paramName, nuint paramValueSize, void* paramValue, out nuint paramValueSizeRet)
             => OpenCLNative.GetMemObjectInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();

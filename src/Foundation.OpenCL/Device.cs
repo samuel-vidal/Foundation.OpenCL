@@ -287,7 +287,7 @@ namespace Foundation.OpenCL
             => OpenCLNative.GetDeviceInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
         protected override void RetainHook() => OpenCLNative.RetainDevice(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseDevice(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<Device> tmpHandle) => OpenCLNative.ReleaseDevice(tmpHandle).ThrowIfUnsuccessful();
 
         public static Device Reify(Handle<Device> handle) => new (handle);
     }

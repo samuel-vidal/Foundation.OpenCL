@@ -244,7 +244,7 @@ namespace Foundation.OpenCL
         #endregion
 
         protected override void RetainHook() => OpenCLNative.RetainProgram(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseProgram(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<Program> tmpHandle) => OpenCLNative.ReleaseProgram(tmpHandle).ThrowIfUnsuccessful();
 
         protected override void GetInfo(ProgramInfo paramName, nuint paramValueSize, void* paramValue, out nuint paramValueSizeRet)
             => OpenCLNative.GetProgramInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();

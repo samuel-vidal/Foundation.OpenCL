@@ -54,7 +54,7 @@ namespace Foundation.OpenCL
             => OpenCLNative.GetSamplerInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
         protected override void RetainHook() => OpenCLNative.RetainSampler(Handle).ThrowIfUnsuccessful();
-        protected override void ReleaseHook() => OpenCLNative.ReleaseSampler(Handle).ThrowIfUnsuccessful();
+        protected override void ReleaseHook(Handle<Sampler> tmpHandle) => OpenCLNative.ReleaseSampler(tmpHandle).ThrowIfUnsuccessful();
 
         public static Sampler Reify(Handle<Sampler> handle) => new(handle);
 
