@@ -1,6 +1,6 @@
 ﻿namespace Foundation.OpenCL.Tests
 {
-    [Explicit]
+    [Category("Hardware")]
     public class LifecycleTests
     {
         [Test]

@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Foundation.OpenCL.Tests
 {
+    [Category("Hardware")]
     public class BasicTests
     {
-        [Explicit]
         [Test]
         public void DebugPlatforms()
         {
@@ -37,7 +37,6 @@ namespace Foundation.OpenCL.Tests
             }
         }
 
-        [Explicit]
         [Test]
         public void TestClBinding()
         {
@@ -84,7 +83,7 @@ namespace Foundation.OpenCL.Tests
             }
         }
 
-        public unsafe void PrintDeviceInfo(Device device, FieldInfo info)
+        private unsafe void PrintDeviceInfo(Device device, FieldInfo info)
         {
             var paramName = (DeviceInfo)info.GetValue(null);
 

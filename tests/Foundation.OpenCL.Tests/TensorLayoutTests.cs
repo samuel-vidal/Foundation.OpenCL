@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Foundation.OpenCL.Tests
 {
-    internal class TensorLayoutTests
+    public class TensorLayoutTests
     {
         [Test]
         public void BasicContiguousTest()

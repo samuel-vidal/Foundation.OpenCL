@@ -10,7 +10,7 @@ using static System.Single;
 
 namespace Foundation.OpenCL.Tests
 {
-    [Explicit]
+    [Category("Hardware")]
     public unsafe class ChainingTests
     {
         [Test]

@@ -6,6 +6,7 @@ using Foundation.OpenCL.Tests.Tensors;
 
 namespace Foundation.OpenCL.Tests
 {
+    [Category("Hardware")]
     public class RunKernelTest
     {
         private const int inputSize = 2048;
@@ -13,7 +14,6 @@ namespace Foundation.OpenCL.Tests
 
         public const string kernelName = "gemm_bf16_layout5";
 
-        [Explicit]
         [TestCase(32)]
         [TestCase(4)]
         public void TestKernel(int batchSize)
