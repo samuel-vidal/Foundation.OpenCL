@@ -87,7 +87,7 @@ namespace Foundation.OpenCL.Tests
                 eventList.Add(completion);
             }
 
-            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, completion);
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
 
             Console.WriteLine($"took {sw.Elapsed}");
 
@@ -185,7 +185,7 @@ namespace Foundation.OpenCL.Tests
 
             Span<float> fv = stackalloc float[v.Length];
 
-            for (int i = 0; i < v.Length; i++) fv[i] = CreateTruncating(v[i]);
+            for (var i = 0; i < v.Length; i++) fv[i] = CreateTruncating(v[i]);
 
             var sum = 0f;
             for (var i = 0; i < v.Length; i++)
@@ -200,7 +200,7 @@ namespace Foundation.OpenCL.Tests
 
             Mult(fv, rnorm);
 
-            for (int i = 0; i < v.Length; i++) v[i] = T.CreateTruncating(fv[i]);
+            for (var i = 0; i < v.Length; i++) v[i] = T.CreateTruncating(fv[i]);
             return norm;
         }
 
