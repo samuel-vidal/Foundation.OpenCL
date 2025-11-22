@@ -164,7 +164,7 @@ namespace Foundation.OpenCL
         public static extern Handle<CommandQueue> CreateCommandQueueWithProperties(
             Handle<Context> context,
             Handle<Device> device,
-            ulong* properties,   // array of cl_queue_properties (nint), null-terminated
+            ulong* properties,
             out ErrorCode errCodeRet);
 
         // cl_int clRetainCommandQueue(cl_command_queue command_queue)

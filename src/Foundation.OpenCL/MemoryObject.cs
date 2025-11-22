@@ -20,12 +20,12 @@ namespace Foundation.OpenCL
         Properties = 0x110A,                      // CL_MEM_PROPERTIES
         D3D10ResourceKhr = 0x4015,                // CL_MEM_D3D10_RESOURCE_KHR
         D3D11ResourceKhr = 0x401E,                // CL_MEM_D3D11_RESOURCE_KHR
-        DX9MediaAdapterTypeKhr = 0x2028,          // CL_MEM_DX9_MEDIA_ADAPTER_TYPE_KHR
-        DX9MediaSurfaceInfoKhr = 0x2029,          // CL_MEM_DX9_MEDIA_SURFACE_INFO_KHR
+        Dx9MediaAdapterTypeKhr = 0x2028,          // CL_MEM_DX9_MEDIA_ADAPTER_TYPE_KHR
+        Dx9MediaSurfaceInfoKhr = 0x2029,          // CL_MEM_DX9_MEDIA_SURFACE_INFO_KHR
         UsesSvmPointerArm = 0x40B7,               // CL_MEM_USES_SVM_POINTER_ARM
-        VAApiMediaSurfaceIntel = 0x4098,          // CL_MEM_VA_API_MEDIA_SURFACE_INTEL
-        DX9ResourceIntel = 0x4027,                // CL_MEM_DX9_RESOURCE_INTEL
-        DX9SharedHandleIntel = 0x4074,            // CL_MEM_DX9_SHARED_HANDLE_INTEL
+        VaApiMediaSurfaceIntel = 0x4098,          // CL_MEM_VA_API_MEDIA_SURFACE_INTEL
+        Dx9ResourceIntel = 0x4027,                // CL_MEM_DX9_RESOURCE_INTEL
+        Dx9SharedHandleIntel = 0x4074,            // CL_MEM_DX9_SHARED_HANDLE_INTEL
     }
 
     public enum MemProperties : ulong
@@ -33,7 +33,7 @@ namespace Foundation.OpenCL
         AllocFlagsImg = 0x40D7,                         // CL_MEM_ALLOC_FLAGS_IMG
         DeviceHandleListKhr = 0x2051,                   // CL_MEM_DEVICE_HANDLE_LIST_KHR
         LocallyUncachedResourceIntel = 0x4218,          // CL_MEM_LOCALLY_UNCACHED_RESOURCE_INTEL
-        DeviceIDIntel = 0x4219,                         // CL_MEM_DEVICE_ID_INTEL
+        DeviceIdIntel = 0x4219,                         // CL_MEM_DEVICE_ID_INTEL
     }
 
     public enum MemObjectType

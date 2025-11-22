@@ -17,11 +17,11 @@ namespace Foundation.OpenCL
         D3D11DeviceKhr = 0x401D,                         // CL_CONTEXT_D3D11_DEVICE_KHR
         D3D11PreferSharedResourcesKhr = 0x402D,          // CL_CONTEXT_D3D11_PREFER_SHARED_RESOURCES_KHR
         AdapterD3D9Khr = 0x2025,                         // CL_CONTEXT_ADAPTER_D3D9_KHR
-        AdapterD3D9EXKhr = 0x2026,                       // CL_CONTEXT_ADAPTER_D3D9EX_KHR
+        AdapterD3D9ExKhr = 0x2026,                       // CL_CONTEXT_ADAPTER_D3D9EX_KHR
         AdapterDxvaKhr = 0x2027,                         // CL_CONTEXT_ADAPTER_DXVA_KHR
-        VAApiDisplayIntel = 0x4097,                      // CL_CONTEXT_VA_API_DISPLAY_INTEL
+        VaApiDisplayIntel = 0x4097,                      // CL_CONTEXT_VA_API_DISPLAY_INTEL
         D3D9DeviceIntel = 0x4026,                        // CL_CONTEXT_D3D9_DEVICE_INTEL
-        D3D9EXDeviceIntel = 0x4072,                      // CL_CONTEXT_D3D9EX_DEVICE_INTEL
+        D3D9ExDeviceIntel = 0x4072,                      // CL_CONTEXT_D3D9EX_DEVICE_INTEL
         DxvaDeviceIntel = 0x4073,                        // CL_CONTEXT_DXVA_DEVICE_INTEL
     }
 
@@ -243,11 +243,11 @@ namespace Foundation.OpenCL
 
         ImageFormat[] GetSupportedImageFormats(MemFlags flags, MemObjectType imageType)
         {
-            OpenCLNative.GetSupportedImageFormats(Handle, flags, imageType, 0, null, out var count).ThrowIfUnsuccessful(); ;
+            OpenCLNative.GetSupportedImageFormats(Handle, flags, imageType, 0, null, out var count).ThrowIfUnsuccessful();
             var formats = new ImageFormat[count];
             fixed (ImageFormat* ptr = formats)
             {
-                OpenCLNative.GetSupportedImageFormats(Handle, flags, imageType, 0, ptr, out _).ThrowIfUnsuccessful(); ;
+                OpenCLNative.GetSupportedImageFormats(Handle, flags, imageType, 0, ptr, out _).ThrowIfUnsuccessful();
             }
 
             return formats;

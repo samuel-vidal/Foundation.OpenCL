@@ -35,10 +35,10 @@ namespace Foundation.OpenCL
         Binaries = 0x1166,                         // CL_PROGRAM_BINARIES
         NumKernels = 0x1167,                       // CL_PROGRAM_NUM_KERNELS
         KernelNames = 0x1168,                      // CL_PROGRAM_KERNEL_NAMES
-        IL = 0x1169,                               // CL_PROGRAM_IL
+        Il = 0x1169,                               // CL_PROGRAM_IL
         ScopeGlobalCtorsPresent = 0x116A,          // CL_PROGRAM_SCOPE_GLOBAL_CTORS_PRESENT
         ScopeGlobalDtorsPresent = 0x116B,          // CL_PROGRAM_SCOPE_GLOBAL_DTORS_PRESENT
-        ILKhr = 0x1169,                            // CL_PROGRAM_IL_KHR
+        IlKhr = 0x1169,                            // CL_PROGRAM_IL_KHR
     }
 
     public enum ProgramBuildStatus

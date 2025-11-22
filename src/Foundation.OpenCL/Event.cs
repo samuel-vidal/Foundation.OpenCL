@@ -178,6 +178,7 @@ namespace Foundation.OpenCL
                         CommandExecutionStatus.Queued => obj.onQueued,
                         CommandExecutionStatus.Running => obj.onRunning,
                         CommandExecutionStatus.Submitted => obj.onSubmitted,
+                        _ => throw new NotSupportedException()
                     };
                     if (multicast != null) multicast();
                 }

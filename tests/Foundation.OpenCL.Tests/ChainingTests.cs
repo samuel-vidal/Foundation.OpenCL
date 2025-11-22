@@ -25,7 +25,7 @@ namespace Foundation.OpenCL.Tests
             var b = manager.Create<Half>([32, 32]);
             var p = manager.Create<Half>([32, 32]);
             var q = manager.Create<Half>([32, 32]);
-            var result_actual = manager.Create<Half>([32, 32]);
+            var actual = manager.Create<Half>([32, 32]);
 
             RandomOrthogonal(rand, a);
             RandomOrthogonal(rand, p);
@@ -76,7 +76,6 @@ namespace Foundation.OpenCL.Tests
             kernel1.SetArgBuffer(1, b_buffer);
             kernel1.SetArgBuffer(2, p_buffer);
 
-
             var eventList = new List<Event>();
 
             var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]);
@@ -95,7 +94,7 @@ namespace Foundation.OpenCL.Tests
                 eventList.Add(completion);
             }
 
-            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, actual.ByteSize, actual.Rep, [completion]);
 
             Console.WriteLine($"took {sw.Elapsed}");
 
@@ -120,7 +119,7 @@ namespace Foundation.OpenCL.Tests
             {
                 for (var j = 0; j < 32; j++)
                 {
-                    Assert.That(Abs((float)result_actual[i, j] - (float)a[i, j]) < tolerance, $"expected[{i},{j}] = {a[i, j]}, actual[{i},{j}] = {result_actual[i, j]}");
+                    Assert.That(Abs((float)actual[i, j] - (float)a[i, j]) < tolerance, $"expected[{i},{j}] = {a[i, j]}, actual[{i},{j}] = {actual[i, j]}");
                 }
             }
 
@@ -363,7 +362,7 @@ namespace Foundation.OpenCL.Tests
         private static string GetResource(string path)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream(path);
+            using var stream = assembly.GetManifestResourceStream(path)!;
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
         }

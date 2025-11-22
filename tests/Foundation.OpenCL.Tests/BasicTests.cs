@@ -74,7 +74,7 @@ namespace Foundation.OpenCL.Tests
                         {
                             PrintDeviceInfo(device, field);
                         }
-                        catch (Exception e)
+                        catch
                         {
 
                         }

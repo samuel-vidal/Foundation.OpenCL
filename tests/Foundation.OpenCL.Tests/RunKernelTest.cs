@@ -12,7 +12,7 @@ namespace Foundation.OpenCL.Tests
         private const int inputSize = 2048;
         private const int outputSize = 2048;
 
-        public const string kernelName = "gemm_bf16_layout5";
+        private const string kernelName = "gemm_bf16_layout5";
 
         [TestCase(32)]
         [TestCase(4)]
@@ -125,7 +125,7 @@ namespace Foundation.OpenCL.Tests
         public static string GetResource(string path)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream(path);
+            using var stream = assembly.GetManifestResourceStream(path)!;
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
         }

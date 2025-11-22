@@ -17,7 +17,6 @@ namespace Foundation.OpenCL
         PropertiesArray = 0x1098,          // CL_QUEUE_PROPERTIES_ARRAY
     }
 
-    [Flags]
     public enum CommandQueueProperty : ulong
     {
         None = 0x0,
