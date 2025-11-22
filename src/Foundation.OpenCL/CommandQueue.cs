@@ -308,6 +308,61 @@ namespace Foundation.OpenCL
             return blocking ? null : Event.Reify(eventHandle);
         }
 
+        public Event EnqueueCopyBufferRect(
+            Buffer targetBuffer,
+            Buffer sourceBuffer,
+            ReadOnlySpan<nuint> targetOrigin,
+            ReadOnlySpan<nuint> sourceOrigin,
+            ReadOnlySpan<nuint> region,
+            ReadOnlySpan<nuint> targetPitch,
+            ReadOnlySpan<nuint> sourcePitch,
+            ReadOnlySpan<Event> waitEvents = default)
+        {
+            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+
+            if (targetOrigin.Length > 3) throw new ArgumentException("Length cannot be greater than 3.", nameof(targetOrigin));
+            if (sourceOrigin.Length > 3) throw new ArgumentException("Length cannot be greater than 3.", nameof(sourceOrigin));
+            if (region.Length > 3) throw new ArgumentException("Length cannot be greater than 3.", nameof(region));
+
+            var srcOriginPtr = stackalloc nuint[3];
+            var dstOriginPtr = stackalloc nuint[3];
+            var regionPtr = stackalloc nuint[3];
+            nuint srcRowPitch = 0;
+            nuint srcSlicePitch = 0;
+            nuint dstRowPitch = 0;
+            nuint dstSlicePitch = 0;
+
+            for (var i = 0; i < 3; i++)
+            {
+                srcOriginPtr[i] = i < targetOrigin.Length ? targetOrigin[i] : 0;
+                dstOriginPtr[i] = i < sourceOrigin.Length ? sourceOrigin[i] : 0;
+                regionPtr[i] = i < region.Length ? region[i] : 1;
+            }
+
+            if (targetPitch.Length > 0) srcRowPitch = targetPitch[0];
+            if (targetPitch.Length > 1) srcSlicePitch = targetPitch[1];
+
+            if (sourcePitch.Length > 0) dstRowPitch = sourcePitch[0];
+            if (sourcePitch.Length > 1) dstSlicePitch = sourcePitch[1];
+
+            OpenCLNative.EnqueueCopyBufferRect(
+                    Handle, sourceBuffer.Handle, targetBuffer.Handle,
+                    srcOriginPtr,
+                    dstOriginPtr,
+                    regionPtr,
+                    srcRowPitch,
+                    srcSlicePitch,
+                    dstRowPitch,
+                    dstSlicePitch,
+                    waitEvents.Length,
+                    NullIfEmpty(waitEvents, eventHandles),
+                    out var eventHandle)
+                .ThrowIfUnsuccessful();
+
+            return Event.Reify(eventHandle);
+        }
+
         #endregion
 
         #endregion
@@ -977,6 +1032,38 @@ namespace Foundation.OpenCL
                 targetPitch,
                 sourcePitch,
                 sourceHostPtr,
+                waitEvents);
+        }
+
+        public static Event EnqueueCopyBufferRect<T>(
+            this CommandQueue queue,
+            Buffer targetBuffer,
+            Buffer sourceBuffer,
+            SubTensorLayout<T> targetLayout,
+            SubTensorLayout<T> sourceLayout,
+            ReadOnlySpan<Event> waitEvents = default)
+            where T : unmanaged
+        {
+            #region Initialize
+
+            Span<nuint> targetOrigin = stackalloc nuint[3];
+            Span<nuint> sourceOrigin = stackalloc nuint[3];
+            Span<nuint> targetPitch = stackalloc nuint[3];
+            Span<nuint> sourcePitch = stackalloc nuint[3];
+            Span<nuint> region = stackalloc nuint[3];
+
+            ConvertArguments(targetLayout, sourceLayout, targetOrigin, sourceOrigin, region, targetPitch, sourcePitch);
+
+            #endregion
+
+            return queue.EnqueueCopyBufferRect(
+                targetBuffer,
+                sourceBuffer,
+                targetOrigin,
+                sourceOrigin,
+                region,
+                targetPitch,
+                sourcePitch,
                 waitEvents);
         }
 
