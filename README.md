@@ -5,7 +5,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Foundation.OpenCL.svg)](https://www.nuget.org/packages/Foundation.OpenCL)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 
-> **Performance Density Matters** - 100 kernel chain executes in **18ms**
+> **Performance Density Matters** - 100 kernel chain executes in **11ms**
 
 Foundation.OpenCL is a high-performance, modern OpenCL binding for .NET that combines the full power of OpenCL 3.0 with idiomatic C# design patterns. Built from the ground up for performance and reliability.
 
@@ -184,8 +184,8 @@ dotnet add package Foundation.OpenCL.Extensions.Intel
 
 ### Project Reference
 ```xml
-<PackageReference Include="Foundation.OpenCL" Version="1.0.1" />
-<PackageReference Include="Foundation.OpenCL.Extensions.Intel" Version="1.0.1" />
+<PackageReference Include="Foundation.OpenCL" Version="1.0.2" />
+<PackageReference Include="Foundation.OpenCL.Extensions.Intel" Version="1.0.2" />
 ```
 
 ## 🔧 Requirements
