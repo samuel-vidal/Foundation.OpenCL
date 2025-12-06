@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Numerics;
 using System.Reflection;
@@ -190,13 +191,14 @@ namespace Foundation.OpenCL.Tests
 
             var eventList = new List<Event>();
 
-            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]);
+
+            var start = context.CreateEvent();
+            eventList.Add(start);
+
+            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [start]);
             eventList.Add(completion);
             completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
             eventList.Add(completion);
-
-            Event.Wait(completion);
-            var sw = Stopwatch.StartNew();
 
             for (var i = 2; i < iterations; i+=2)
             {
@@ -206,11 +208,15 @@ namespace Foundation.OpenCL.Tests
                 eventList.Add(completion);
             }
 
-            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
-
-            Console.WriteLine($"took {sw.Elapsed}");
 
             queue.Flush();
+
+            var sw = Stopwatch.StartNew();
+            start.SetEvenStatus(CommandExecutionStatus.Complete);
+
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
+            Console.WriteLine($"took {sw.Elapsed}");
+
             queue.Finish();
 
             foreach (var ev in eventList) ev.Dispose();
@@ -277,8 +283,7 @@ namespace Foundation.OpenCL.Tests
                     "-cl-std=CL3.0",
                     () =>
                     {
-                        Console.WriteLine(
-                            $"Program built successfully for device: {device.GetStringInfo(DeviceInfo.Name)}");
+                        Console.WriteLine($"Program built successfully for device: {device.GetStringInfo(DeviceInfo.Name)}");
                     });
             }
             catch
@@ -299,6 +304,7 @@ namespace Foundation.OpenCL.Tests
             kernel1.SetArgBuffer(2, p_buffer);
 
             var eventList = new List<Event>();
+
 
             eventList.Add(queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]));
             eventList.Add(queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32]));

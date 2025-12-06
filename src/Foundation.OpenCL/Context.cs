@@ -241,7 +241,7 @@ namespace Foundation.OpenCL
 
         //      CreateImageWithProperties
 
-        ImageFormat[] GetSupportedImageFormats(MemFlags flags, MemObjectType imageType)
+        public ImageFormat[] GetSupportedImageFormats(MemFlags flags, MemObjectType imageType)
         {
             OpenCLNative.GetSupportedImageFormats(Handle, flags, imageType, 0, null, out var count).ThrowIfUnsuccessful();
             var formats = new ImageFormat[count];

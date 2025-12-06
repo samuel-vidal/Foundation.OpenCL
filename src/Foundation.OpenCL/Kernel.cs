@@ -112,10 +112,11 @@ namespace Foundation.OpenCL
             SetArg(index, ref value);
         }
 
-        public void SetArgBuffer(int index, Buffer buffer)
+        public void SetArgBuffer<TBuffer>(int index, TBuffer buffer)
+            where TBuffer : BaseMemoryObject<TBuffer>, IReify<TBuffer, MemoryObject>
         {
-            var handleValue = buffer.Handle.Value;
-            SetArg(index, (nuint)sizeof(nint), &handleValue);
+            var handle = buffer.Handle;
+            SetArg(index, (nuint)sizeof(nint), &handle);
         }
 
         public void SetArgLocal(int index, nuint size)      // todo read doc
