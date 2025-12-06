@@ -1,0 +1,57 @@
+name: NuGet Publish Workflow
+
+# 
+
+# Defines the triggers for this workflow
+on:
+  # 1. Automatic Trigger (Recommended): Runs when a new tag like 'v1.2.3' is pushed.
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-**' # Also handles pre-release tags like v1.0.0-beta1
+
+  # 2. Manual Trigger: Adds a "Run workflow" button to the Actions tab
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.1 or 1.0.1-preview)'
+        required: true
+        
+ jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        # Use the .NET version your project targets
+        dotnet-version: '9.0.x' 
+
+    # --- Determine the Package Version ---
+    - name: Get Version from Tag or Manual Input
+      id: get_version
+      run: |
+        # Check if the trigger was a Git Tag (push event)
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          # Extract version from tag (e.g., refs/tags/v1.0.0 -> 1.0.0)
+          VERSION="${{ github.ref_name }}"
+          # Strip leading 'v' if present
+          VERSION="${VERSION#v}"
+        else
+          # Use version from manual input (workflow_dispatch)
+          VERSION="${{ github.event.inputs.version }}"
+        fi
+        echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build and Pack the NuGet package
+      run: dotnet pack --configuration Release --no-build --output ./nupkg /p:Version=${{ steps.get_version.outputs.PACKAGE_VERSION }}
+      
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate

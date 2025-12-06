@@ -159,7 +159,7 @@ namespace Foundation.OpenCL.Extensions.Intel
         public static UnifiedSharedMemoryType GetAllocationType(this Context context, void* ptr)
             => (UnifiedSharedMemoryType)context.GetAllocInfo<ulong>(ptr, MemAllocInfo.Type);
 
-#endregion
+        #endregion
 
         #region Kernel USM Argument Methods
 
