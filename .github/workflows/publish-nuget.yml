@@ -46,9 +46,13 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
         fi
         echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_OUTPUT
+            
         
     - name: Restore dependencies
       run: dotnet restore
+      
+    - name: Build project
+      run: dotnet build --configuration Release
       
     - name: Build and Pack the NuGet package
       run: dotnet pack --configuration Release --no-build --output ./nupkg /p:Version=${{ steps.get_version.outputs.PACKAGE_VERSION }}
