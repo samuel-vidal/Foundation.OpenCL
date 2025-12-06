@@ -17,7 +17,7 @@ on:
         description: 'Version to publish (e.g., 1.0.1 or 1.0.1-preview)'
         required: true
         
- jobs:
+jobs:
   publish:
     runs-on: ubuntu-latest
     
