@@ -88,7 +88,6 @@ namespace Foundation.OpenCL
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
 
-
             Handle<Event> eventHandle;
             OpenCLNative.EnqueueWriteBuffer(
                     Handle, buffer.Handle, false, offset, size, hostPtr,

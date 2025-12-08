@@ -123,7 +123,6 @@ namespace Foundation.OpenCL.Tests
             {
                 return string.Join(" ", buffer.ToArray().Select(b => $"{b:X2}"));
             }
-
         }
 
         private static bool IsAsciiCString(ReadOnlySpan<byte> buffer)

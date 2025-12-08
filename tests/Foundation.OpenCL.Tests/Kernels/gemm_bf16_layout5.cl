@@ -13,12 +13,12 @@ __kernel void gemm_bf16_layout5(
 {
     const int maxBatchSize = 256;
     //const int maxUnroll = 8;
-    //const int warpSize = (int) get_sub_group_size();    //   16      32
-    const int warpSize = 32;    //   16      32
+    //const int warpSize = (int) get_sub_group_size();		//   16      32
+    const int warpSize = 32;								//   16      32
     const int maxUnroll = 4;
-    const int cacheLine = 256;                          //  256     256
-    const int tileSize = 128;     //  128     128
-    const int unroll = tileSize / warpSize;             //    8       4
+    const int cacheLine = 256;								//  256     256
+    const int tileSize = 128;								//  128     128
+    const int unroll = tileSize / warpSize;					//    8       4
     
     const int synchro = 1;
 

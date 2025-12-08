@@ -169,19 +169,6 @@ namespace Foundation.OpenCL.Tests.Tensors
             return maxIndex + 1;
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public static bool IsContiguous<T>(this Tensor<T> tensor)
-        //    where T : unmanaged
-        //{
-        //    return tensor.Strides.Any(s => s == 1);
-        //}
-
-        //public static Span<T> DimensionAsSpan<T>(this Tensor<T> tensor, int dim)
-        //    where T : unmanaged
-        //{
-        //    return tensor.Strides[i] == dim;
-        //}
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsContiguous<T>(this Tensor<T> tensor, int dim)
             where T : unmanaged

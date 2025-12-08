@@ -1,11 +1,5 @@
 ﻿
-
-
-
-enum
-{
-    k_size = 32
-};
+enum { k_size = 32 };
 
 __attribute__((intel_reqd_sub_group_size(32)))
 __kernel void basic_gemm_square(
