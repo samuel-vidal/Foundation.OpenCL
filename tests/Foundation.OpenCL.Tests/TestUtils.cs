@@ -9,6 +9,12 @@ namespace Foundation.OpenCL.Tests
 {
     public static class TestUtils
     {
+        public record Params(
+            nuint[] GlobalSize,
+            nuint[] LocalSize,
+            Action<Kernel>? SetArguments = null
+        );
+
         public static string GetResource(string path)
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -67,14 +73,14 @@ namespace Foundation.OpenCL.Tests
                     var sum = TAcc.Zero;
                     for (var k = 0; k < n3; k++)
                     {
-                        sum += TAcc.CreateTruncating(a[i, k] * b[k, j]);
+                        sum += TAcc.CreateTruncating(a[i, k]) * TAcc.CreateTruncating(b[k, j]);
                     }
                     c[i, j] = TCoeff.CreateTruncating(sum + TAcc.CreateTruncating(c[i, j]));
                 }
             }
         }
 
-        public static void RunTest<T>(
+        public static void RunTest<T, TAcc>(
             int n1,
             int n2,
             int n3,
@@ -82,8 +88,10 @@ namespace Foundation.OpenCL.Tests
             TensorLayout layoutA,
             TensorLayout layoutB,
             string kernelName,
-            T epsilon)
+            T epsilon,
+            Params? parameters = null)
             where T : unmanaged, INumber<T>
+            where TAcc : unmanaged, INumber<TAcc>
         {
             #region Prepare
 
@@ -102,13 +110,14 @@ namespace Foundation.OpenCL.Tests
 
             #region Actual
 
-            GpuImplementation(c_gpu, a, b, kernelName);
+            parameters ??= new Params([16], [16]);
+            GpuImplementation(c_gpu, a, b, kernelName, parameters);
 
             #endregion
 
             #region Expected
 
-            ReferenceImplementation(c_cpu, a, b);
+            ReferenceImplementation<T, TAcc>(c_cpu, a, b);
 
             #endregion
 
@@ -118,7 +127,7 @@ namespace Foundation.OpenCL.Tests
             {
                 for (var j = 0; j < n3; j++)
                 {
-                    Assert.That(T.Abs(c_gpu[i, j] - c_cpu[i, j]) < epsilon, $"Mismatch at i={i}, j={j}, expected={c_cpu[i, j]}, actual={c_gpu[i, j]}");
+                    Assert.That(T.Abs(c_gpu[i, j] - c_cpu[i, j]) <= epsilon, $"Mismatch at i={i}, j={j}, expected={c_cpu[i, j]}, actual={c_gpu[i, j]}");
                 }
             }
 
@@ -131,7 +140,8 @@ namespace Foundation.OpenCL.Tests
             Tensor<T> y,
             Tensor<T> x,
             Tensor<T> w,
-            string kernelName)
+            string kernelName,
+            Params parameters)
             where T : unmanaged, INumber<T>
         {
             // 1. Platform/Device discovery with our clean API
@@ -177,10 +187,12 @@ namespace Foundation.OpenCL.Tests
             kernel.SetArgBuffer(1, xBuffer);
             kernel.SetArgBuffer(2, wBuffer);
 
+            if (parameters.SetArguments is not null) parameters.SetArguments(kernel);
+
             // 8. Configure execution dimensions
-            var globalOffset = new nuint[] { 0 };
-            var globalSize = new nuint[] { 16 };
-            var localSize = new nuint[] { 16 };
+            var globalOffset = new nuint[parameters.GlobalSize.Length];
+            var globalSize = parameters.GlobalSize;
+            var localSize = parameters.LocalSize;
 
             // 9. Execute kernel with proper event synchronization
             var sw = Stopwatch.StartNew();

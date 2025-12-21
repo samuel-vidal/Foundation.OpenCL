@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11222.15 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.OpenCL", "src\Foundation.OpenCL\Foundation.OpenCL.csproj", "{E15C852B-8BB1-24B7-99C3-CBF5BF81EA86}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.OpenCL.Extensions.Intel", "src\Foundation.OpenCL.Extensions.Intel\Foundation.OpenCL.Extensions.Intel.csproj", "{44960B2E-EF3B-04BA-70BB-60F7B0429AEA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.OpenCL.Tests", "tests\Foundation.OpenCL.Tests\Foundation.OpenCL.Tests.csproj", "{40B4D46E-5CED-7433-DD0B-2CE48B849909}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shell", "Shell\Shell.csproj", "{EEB4D176-6243-4C87-ACDB-41158219C542}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{40B4D46E-5CED-7433-DD0B-2CE48B849909}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40B4D46E-5CED-7433-DD0B-2CE48B849909}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40B4D46E-5CED-7433-DD0B-2CE48B849909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEB4D176-6243-4C87-ACDB-41158219C542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEB4D176-6243-4C87-ACDB-41158219C542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEB4D176-6243-4C87-ACDB-41158219C542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEB4D176-6243-4C87-ACDB-41158219C542}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

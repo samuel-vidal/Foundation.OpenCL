@@ -17,7 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Kernels\gemm_1_2048_16n.cl" />
+    <EmbeddedResource Include="Kernels\gemm_1_2048_16.cl" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Kernels\basic_gemm_square.cl" />
+    <EmbeddedResource Include="Kernels\gemm_b_m_n.cl" />
+    <EmbeddedResource Include="Kernels\gemm_8_2048_16.cl" />
+    <EmbeddedResource Include="Kernels\gemm_8_32_16.cl" />
+    <EmbeddedResource Include="Kernels\gemm_8_32_32.cl" />
     <EmbeddedResource Include="Kernels\gemm_8_16_16_col_maj.cl" />
     <EmbeddedResource Include="Kernels\gemm_8_16_16.cl" />
     <EmbeddedResource Include="Kernels\gemm_bf16_layout5.cl" />

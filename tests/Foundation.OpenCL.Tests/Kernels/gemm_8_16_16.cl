@@ -28,6 +28,7 @@ __kernel void gemm_8_16_16(
 		//	b[tid * 16 + 2*i + 1]));			// W[tid, 2*i + 1] is loaded into B[2*i + 1, tid]
 	}
 
+	// commented code (non-coalesced access) boils down to that simd intrinsic
 	b_reg = vload8(tid, (int*) b);
 
 	c_reg = intel_sub_group_f16_f16_matrix_mad_k16(as_short8(a_reg), b_reg, c_reg);
