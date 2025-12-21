@@ -41,7 +41,7 @@ enum
 };
 
 __attribute__((intel_reqd_sub_group_size(16)))
-kernel void gemm_1_2048_16n(
+kernel void gemm_1_2048_16n_fused_layer_norm(
     global const half* c,
     global const half* a,
     global const half* b)
@@ -60,6 +60,7 @@ kernel void gemm_1_2048_16n(
     private half a_reg0;
     private half a_reg1;
     private float c_reg = 0.0f;
+	private float sq_norm = 0.0f;
 
     int current = 1;
     int next = 0;
@@ -97,6 +98,8 @@ kernel void gemm_1_2048_16n(
         half2 tmp = coalesced_load_32((local half *)&a_tile[current][sid], tid);
         a_reg0 = tmp[0];
         a_reg1 = tmp[1];
+
+		sq_norm += a_reg0 * a_reg0 + a_reg1 * a_reg1;
 		
 		b_reg = vload16(tid * k_subgroup_count, (int*) &b_tile[current][0][sid]);
 
@@ -106,6 +109,8 @@ kernel void gemm_1_2048_16n(
     }
 
     // Epilogue
+
+	float scale = 1.0f / sqrt(work_group_reduce_add(sq_norm) / k_stride + 1e-6f);
 
     for (int s = k_subgroup_count; s > 0; s >>= 1)
     {
@@ -118,6 +123,6 @@ kernel void gemm_1_2048_16n(
 
     if (sid == 0)
     {
-        coalesced_store_16(c + j * 16, c_reg, tid);
+        coalesced_store_16(c + j * 16, c_reg * scale, tid);
     }
 }

@@ -80,6 +80,58 @@ namespace Foundation.OpenCL.Tests
             }
         }
 
+        public static void ReferenceImplementationLayerNorm<TCoeff, TAcc>(
+            Tensor<TCoeff> c,
+            Tensor<TCoeff> a,
+            Tensor<TCoeff> b)
+            where TCoeff : unmanaged, INumber<TCoeff>
+            where TAcc : unmanaged, IRootFunctions<TAcc>
+        {
+            #region Checks
+
+            Check.That(a.Rank == 2);
+            Check.That(b.Rank == 2);
+            Check.That(c.Rank == 2);
+
+            Check.That(c.Dimensions[0] == a.Dimensions[0]);
+            Check.That(c.Dimensions[1] == b.Dimensions[1]);
+            Check.That(a.Dimensions[1] == b.Dimensions[0]);
+
+            #endregion
+
+            var n1 = c.Dimensions[0];
+            var n2 = c.Dimensions[1];
+            var n3 = a.Dimensions[1];
+
+            Span<TAcc> scale = new TAcc[n1];
+            var epsilon = TAcc.CreateTruncating(1e-6);
+
+            for (int i = 0; i < n1; i++)
+            {
+                var sq_norm = TAcc.Zero;
+                for (int j = 0; j < n3; j++)
+                {
+                    var val = TAcc.CreateTruncating(a[i, j]);
+                    sq_norm += val * val;
+                }
+
+                scale[i] = TAcc.One / TAcc.Sqrt(sq_norm / TAcc.CreateTruncating(n3) + epsilon);
+            }
+
+            for (var i = 0; i < n1; i++)
+            {
+                for (var j = 0; j < n2; j++)
+                {
+                    var sum = TAcc.Zero;
+                    for (var k = 0; k < n3; k++)
+                    {
+                        sum += TAcc.CreateTruncating(a[i, k]) * TAcc.CreateTruncating(b[k, j]);
+                    }
+                    c[i, j] = TCoeff.CreateTruncating(sum * scale[i] + TAcc.CreateTruncating(c[i, j]));
+                }
+            }
+        }
+
         public static void RunTest<T, TAcc>(
             int n1,
             int n2,
@@ -89,7 +141,8 @@ namespace Foundation.OpenCL.Tests
             TensorLayout layoutB,
             string kernelName,
             T epsilon,
-            Params? parameters = null)
+            Params? parameters = null,
+            Action<Tensor<T>, Tensor<T>, Tensor<T>>? reference = null)
             where T : unmanaged, INumber<T>
             where TAcc : unmanaged, INumber<TAcc>
         {
@@ -117,7 +170,8 @@ namespace Foundation.OpenCL.Tests
 
             #region Expected
 
-            ReferenceImplementation<T, TAcc>(c_cpu, a, b);
+            reference ??= ReferenceImplementation<T, TAcc>;
+            reference(c_cpu, a, b);
 
             #endregion
 

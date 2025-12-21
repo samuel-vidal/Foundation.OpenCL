@@ -76,7 +76,7 @@ namespace Foundation.OpenCL.Tests
         {
             const int batchSize = 1;
             const int inputSize = 2048;
-            int outputSize = 16*n;
+            int outputSize = 16 * n;
 
             const string kernelName = "gemm_1_2048_16n";
 
@@ -90,6 +90,32 @@ namespace Foundation.OpenCL.Tests
                 TensorLayout.FirstIndexContiguous,
                 kernelName, (Half)1e-2,
                 new TestUtils.Params([(nuint)(n * 256)], [256]));
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(128)]
+        [TestCase(1024)]
+        public void Test_1_2048_16n_fused_layer_norm(int n)
+        {
+            const int batchSize = 1;
+            const int inputSize = 2048;
+            int outputSize = 16 * n;
+
+            const string kernelName = "gemm_1_2048_16n_fused_layer_norm";
+
+            Console.WriteLine(
+                $"Test {kernelName} : inputSize = {inputSize}, outputSize = {outputSize}, batchSize = {batchSize},");
+
+            TestUtils.RunTest<Half, float>(
+                batchSize, inputSize, outputSize,
+                TensorLayout.LastIndexContiguous,
+                TensorLayout.LastIndexContiguous,
+                TensorLayout.FirstIndexContiguous,
+                kernelName, (Half)1e-1,
+                new TestUtils.Params([(nuint)(n * 256)], [256]),
+                TestUtils.ReferenceImplementationLayerNorm <Half, float>);
         }
 
         [Test]
