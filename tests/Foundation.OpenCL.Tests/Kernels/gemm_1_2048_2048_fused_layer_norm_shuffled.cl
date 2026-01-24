@@ -40,9 +40,14 @@ enum
     k_stride = 2048
 };
 
+inline int shuffle_output_columns(int i, int j)
+{
+	return (1265 * (j * 16 + i))%2048;
+}
+
 __attribute__((intel_reqd_sub_group_size(16)))
-kernel void gemm_1_2048_16n_fused_layer_norm(
-    global const half* c,
+kernel void gemm_1_2048_2048_fused_layer_norm_shuffled(
+    global half* c,
     global const half* a,
     global const half* b)
 {
@@ -68,7 +73,7 @@ kernel void gemm_1_2048_16n_fused_layer_norm(
     event_t completion_b [16];
     for (int i = 0; i < 16; i++)
     {
-        completion_b[i] = async_work_group_copy(&b_tile[next][i][0], (global int16 *)(b + (j * 16 + i) * k_stride), k_subgroup_count, 0);
+        completion_b[i] = async_work_group_copy(&b_tile[next][i][0], (global int16 *)(b + shuffle_output_columns(i,j) * k_stride), k_subgroup_count, 0);
     }
 
     event_t completion_a = async_work_group_copy(&a_tile[next][0], (global int16 *)a, k_subgroup_count, 0);
@@ -84,7 +89,7 @@ kernel void gemm_1_2048_16n_fused_layer_norm(
         {
             for (int i = 0; i < 16; i++)
             {
-                completion_b[i] = async_work_group_copy(&b_tile[next][i][0], (global int16 *)(b + (j * 16 + i) * k_stride + (k+1) * 32 * k_subgroup_count), k_subgroup_count, 0);
+                completion_b[i] = async_work_group_copy(&b_tile[next][i][0], (global int16 *)(b + shuffle_output_columns(i,j) * k_stride + (k+1) * 32 * k_subgroup_count), k_subgroup_count, 0);
             }
         }
 		
@@ -123,6 +128,11 @@ kernel void gemm_1_2048_16n_fused_layer_norm(
 
     if (sid == 0)
     {
-        coalesced_store_16(c + j * 16, c_reg * scale, tid);
+		// non-coalesced :
+
+		*(half*)(c + shuffle_output_columns(tid,j)) = c_reg * scale;
+
+
+        // coalesced_store_16(c + j * 16, c_reg * scale, tid);
     }
 }

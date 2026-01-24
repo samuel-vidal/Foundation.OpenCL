@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Kernels\gemm_1_2048_2048_fused_layer_norm_shuffled.cl" />
     <EmbeddedResource Include="Kernels\gemm_1_2048_16n_fused_layer_norm.cl" />
     <EmbeddedResource Include="Kernels\gemm_1_2048_16n.cl" />
     <EmbeddedResource Include="Kernels\gemm_1_2048_16.cl" />

@@ -229,9 +229,9 @@ namespace Foundation.OpenCL.Tests
             }
 
             // 5. Create buffers with proper memory flags
-            var yBuffer = context.CreateBuffer(MemFlags.ReadWrite | MemFlags.CopyHostPtr, y.ByteSize, y.Rep);
-            var xBuffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr, x.ByteSize, x.Rep);
-            var wBuffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr, w.ByteSize, w.Rep);
+            var yBuffer = context.CreateBuffer(MemFlags.ReadWrite | MemFlags.CopyHostPtr | MemFlags.HostReadOnly, y.ByteSize, y.Rep);
+            var xBuffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr | MemFlags.HostNoAccess, x.ByteSize, x.Rep);
+            var wBuffer = context.CreateBuffer(MemFlags.ReadOnly | MemFlags.CopyHostPtr | MemFlags.HostNoAccess, w.ByteSize, w.Rep);
 
             // 6. Create kernel with type-safe argument setting
             var kernel = program.CreateKernel(kernelName);

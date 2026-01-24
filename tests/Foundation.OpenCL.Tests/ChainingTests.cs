@@ -16,6 +16,7 @@ namespace Foundation.OpenCL.Tests
         [TestCase(2, 5e-4f)]
         [TestCase(8, 1e-3f)]
         [TestCase(100, 1e-2f)]
+        [TestCase(10000, 1e2f)]
         public void Strategy1(int iterations, float tolerance)
         {
             var manager = new TensorMemoryManager();
@@ -129,6 +130,7 @@ namespace Foundation.OpenCL.Tests
         [TestCase(2, 5e-4f)]
         [TestCase(8, 1e-3f)]
         [TestCase(100, 1e-2f)]
+        [TestCase(1000, 10)]
         public void Strategy2(int iterations, float tolerance)
         {
             var manager = new TensorMemoryManager();
