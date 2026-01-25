@@ -112,6 +112,13 @@ namespace Foundation.OpenCL
         }
     }
 
+    public abstract class BaseObject<TSelf>(Handle<TSelf> handle)
+        : BaseObject<TSelf, TSelf>(handle)
+        where TSelf : BaseObject<TSelf>, IReify<TSelf>
+    {
+
+    }
+
 
     public abstract class InformationNode<TSelf, TInfo>(Handle<TSelf> handle)
         : InformationNode<TSelf, TSelf, TInfo>(handle)
