@@ -90,7 +90,7 @@ namespace Foundation.OpenCL
     #endregion
 
     public sealed unsafe class Kernel(Handle<Kernel> handle)
-        : BaseObject<Kernel, KernelInfo>(handle), IReify<Kernel>
+        : InformationNode<Kernel, KernelInfo>(handle), IReify<Kernel>
     {
         #region Kernel Arguments
 

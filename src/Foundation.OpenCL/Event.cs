@@ -28,7 +28,7 @@ namespace Foundation.OpenCL
     #endregion
 
     public sealed unsafe class Event(Handle<Event> handle)
-        : BaseObject<Event, EventInfo>(handle), IReify<Event>
+        : InformationNode<Event, EventInfo>(handle), IReify<Event>
     {
         public static void Wait(params ReadOnlySpan<Event> events)
         {

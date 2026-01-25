@@ -48,7 +48,7 @@ namespace Foundation.OpenCL
     #endregion
 
     public sealed unsafe class CommandQueue(Handle<CommandQueue> handle)
-        : BaseObject<CommandQueue, CommandQueueInfo>(handle), IReify<CommandQueue>
+        : InformationNode<CommandQueue, CommandQueueInfo>(handle), IReify<CommandQueue>
     {
         public void Flush() => OpenCLNative.Flush(Handle).ThrowIfUnsuccessful();
 

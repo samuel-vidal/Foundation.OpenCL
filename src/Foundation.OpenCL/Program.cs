@@ -58,7 +58,7 @@ namespace Foundation.OpenCL
     }
 
     public sealed unsafe class Program(Handle<Program> handle)
-        : BaseObject<Program, ProgramInfo>(handle), IReify<Program>
+        : InformationNode<Program, ProgramInfo>(handle), IReify<Program>
     {
         #region Compilation & Linking
 

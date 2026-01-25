@@ -105,8 +105,8 @@ namespace Foundation.OpenCL
     }
 
     public abstract unsafe class BaseMemoryObject<TSelf>(Handle<MemoryObject> handle)
-        : BaseObject<TSelf, MemoryObject, MemInfo>(handle)
-        where TSelf : BaseObject<TSelf, MemoryObject, MemInfo>, IReify<TSelf, MemoryObject>
+        : InformationNode<TSelf, MemoryObject, MemInfo>(handle)
+        where TSelf : InformationNode<TSelf, MemoryObject, MemInfo>, IReify<TSelf, MemoryObject>
     {
 
         public void SetDestructorCallback(Action callback)

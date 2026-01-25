@@ -48,7 +48,7 @@ namespace Foundation.OpenCL
     }
 
     public sealed unsafe class Context(Handle<Context> handle)
-        : BaseObject<Context, ContextInfo>(handle), IReify<Context>
+        : InformationNode<Context, ContextInfo>(handle), IReify<Context>
     {
         #region Create Context
 

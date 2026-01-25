@@ -48,7 +48,7 @@ namespace Foundation.OpenCL
     }
 
     public sealed unsafe class Sampler(Handle<Sampler> handle)
-        : BaseObject<Sampler, SamplerInfo>(handle), IReify<Sampler>
+        : InformationNode<Sampler, SamplerInfo>(handle), IReify<Sampler>
     {
         protected override void GetInfo(SamplerInfo paramName, nuint paramValueSize, void* paramValue, out nuint paramValueSizeRet)
             => OpenCLNative.GetSamplerInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();

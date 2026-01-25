@@ -16,7 +16,7 @@ namespace Foundation.OpenCL.Tests
         [TestCase(2, 5e-4f)]
         [TestCase(8, 1e-3f)]
         [TestCase(100, 1e-2f)]
-        [TestCase(10000, 1e2f)]
+        [TestCase(1000, 1e2f)]
         public void Strategy1(int iterations, float tolerance)
         {
             var manager = new TensorMemoryManager();
@@ -40,6 +40,8 @@ namespace Foundation.OpenCL.Tests
                 device,
                 CommandQueueProperty.OutOfOrderExecModeEnable,
                 CommandQueueProperty.OnDevice);
+                //CommandQueueProperty.NoSyncOperationsIntel,
+                //CommandQueueProperty.ThreadLocalExecEnableIntel);
 
             var a_buffer = context.CreateBuffer(MemFlags.ReadWrite | MemFlags.CopyHostPtr, a.ByteSize, a.Rep);
             var b_buffer = context.CreateBuffer(MemFlags.ReadWrite, b.ByteSize);

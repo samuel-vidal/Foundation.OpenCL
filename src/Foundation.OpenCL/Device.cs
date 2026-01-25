@@ -244,7 +244,7 @@ namespace Foundation.OpenCL
     }
 
     public sealed unsafe class Device(Handle<Device> handle)
-        : BaseObject<Device, DeviceInfo>(handle), IReify<Device>
+        : InformationNode<Device, DeviceInfo>(handle), IReify<Device>
     {
         public Device[] CreateSubDevices(params ReadOnlySpan<PartitionConfig> properties)
         {

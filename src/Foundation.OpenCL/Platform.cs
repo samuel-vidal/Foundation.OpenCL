@@ -27,7 +27,7 @@ namespace Foundation.OpenCL
     #endregion
 
     public sealed unsafe class Platform(Handle<Platform> handle)
-        : BaseObject<Platform, PlatformInfo>(handle), IReify<Platform>
+        : InformationNode<Platform, PlatformInfo>(handle), IReify<Platform>
     {
         public static Platform[] GetPlatforms()
         {

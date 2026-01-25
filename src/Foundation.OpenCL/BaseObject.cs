@@ -30,10 +30,9 @@ namespace Foundation.OpenCL
 
     }
 
-    public abstract class BaseObject<TSelf, TTag, TInfo>(Handle<TTag> handle)
-        : InformationNode<TInfo>, IDisposable
-        where TSelf : BaseObject<TSelf, TTag, TInfo>, IReify<TSelf, TTag>
-        where TInfo : Enum
+    public abstract class BaseObject<TSelf, TTag>(Handle<TTag> handle)
+        : IDisposable
+        where TSelf : BaseObject<TSelf, TTag>, IReify<TSelf, TTag>
     {
         private Handle<TTag> handle = handle;
 
@@ -114,15 +113,17 @@ namespace Foundation.OpenCL
     }
 
 
-    public abstract class BaseObject<TSelf, TInfo>(Handle<TSelf> handle)
-        : BaseObject<TSelf, TSelf, TInfo>(handle)
-        where TSelf : BaseObject<TSelf, TInfo>, IReify<TSelf>
+    public abstract class InformationNode<TSelf, TInfo>(Handle<TSelf> handle)
+        : InformationNode<TSelf, TSelf, TInfo>(handle)
+        where TSelf : InformationNode<TSelf, TInfo>, IReify<TSelf>
         where TInfo : Enum
     {
 
     }
 
-    public abstract unsafe class InformationNode<TInfo>
+    public abstract unsafe class InformationNode<TSelf, TTag, TInfo>(Handle<TTag> handle)
+        : BaseObject<TSelf, TTag>(handle)
+        where TSelf: InformationNode<TSelf, TTag, TInfo>, IReify<TSelf, TTag>
         where TInfo : Enum
     {
         protected abstract void GetInfo(TInfo paramName,
@@ -153,7 +154,8 @@ namespace Foundation.OpenCL
             var buffer = stackalloc byte[length];
 
             GetInfo(paramName, (nuint)length, buffer, out _);
-            return Encoding.ASCII.GetString(new ReadOnlySpan<byte>(buffer, length - 1));        // C-strings have an extra zero in the end.
+            return Encoding.ASCII.GetString(new ReadOnlySpan<byte>(buffer,
+                length - 1)); // C-strings have an extra zero in the end.
         }
 
         public int GetInfoByteSize(TInfo paramName)
