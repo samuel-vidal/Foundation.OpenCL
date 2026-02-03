@@ -12,12 +12,19 @@ namespace Shell
     {
         static void Main(string[] args)
         {
+            var test = new IntelMxmIntrinsicsTests();
+
+            test.Test_gemm_kiss();
+
+
             // This small exe can be used with VTune profiler
 
-            Benchmark(
-                2048,
-                1,
-                200);
+
+
+            //Benchmark(
+            //    2048,
+            //    1,
+            //    200);
         }
 
         public static void MicroBenchmark()

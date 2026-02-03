@@ -26,6 +26,33 @@ namespace Foundation.OpenCL.Tests
                 kernelName, (Half)0);
         }
 
+
+        [Test]
+        public void Test_gemm_kiss()
+        {
+            const int inputSize = 2048;
+            const int outputSize = 2048;
+            const int batchSize = 16;
+
+            const string kernelName = "gemm_kiss";
+
+            Console.WriteLine(
+                $"Test {kernelName} : inputSize = {inputSize}, outputSize = {outputSize}, batchSize = {batchSize},");
+
+            TestUtils.RunTest<Half, float>(
+                n1: outputSize,
+                n2: inputSize,
+                n3: batchSize,
+                layoutA: TensorLayout.LastIndexContiguous,
+                layoutB:TensorLayout.FirstIndexContiguous,
+                layoutC: TensorLayout.FirstIndexContiguous,
+                kernelName: kernelName, epsilon: (Half)1e-2,
+                parameters: new TestUtils.Params(
+                    GlobalSize:[outputSize * 32],
+                    LocalSize: [32], ker => ker.SetArg(3, batchSize)));
+        }
+
+
         [Test]
         public void Test_8_32_32_row_maj()
         {

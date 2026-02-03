@@ -248,15 +248,22 @@ namespace Foundation.OpenCL.Tests
             var globalSize = parameters.GlobalSize;
             var localSize = parameters.LocalSize;
 
+            using var start = context.CreateEvent();
+
             // 9. Execute kernel with proper event synchronization
-            var sw = Stopwatch.StartNew();
 
             using var kernelEvent = queue.EnqueueNdRangeKernel(
-                kernel, globalOffset, globalSize, localSize);
+                kernel, globalOffset, globalSize, localSize, [start]);
 
+            queue.Flush();
+
+            var sw = Stopwatch.StartNew();
+            start.SetEvenStatus(CommandExecutionStatus.Complete);
             kernelEvent.Wait(); // Blocks until kernel completion
 
-            Console.WriteLine($"Kernel execution took: {sw.ElapsedMilliseconds} ms");
+            var elapsedMicroSeconds = sw.Elapsed.TotalMicroseconds;
+
+            Console.WriteLine($"Kernel execution took: {elapsedMicroSeconds/1000} ms");
 
             // 10. Read back results with blocking call
             queue.EnqueueReadBufferBlocking(yBuffer, 0, y.ByteSize, y.Rep);
