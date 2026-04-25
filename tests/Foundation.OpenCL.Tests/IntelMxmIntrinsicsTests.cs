@@ -27,12 +27,11 @@ namespace Foundation.OpenCL.Tests
         }
 
 
-        [Test]
-        public void Test_gemm_kiss()
+        [Test, Combinatorial]
+        public void Test_gemm_kiss([Values(1, 2, 4, 16, 32)] int batchSize)
         {
             const int inputSize = 2048;
             const int outputSize = 2048;
-            const int batchSize = 16;
 
             const string kernelName = "gemm_kiss";
 

@@ -248,7 +248,7 @@ namespace Foundation.OpenCL.Tests
             var globalSize = parameters.GlobalSize;
             var localSize = parameters.LocalSize;
 
-            using var start = context.CreateEvent();
+            using var start = context.CreateUserEvent();
 
             // 9. Execute kernel with proper event synchronization
 
@@ -258,7 +258,7 @@ namespace Foundation.OpenCL.Tests
             queue.Flush();
 
             var sw = Stopwatch.StartNew();
-            start.SetEvenStatus(CommandExecutionStatus.Complete);
+            start.SetEventStatus(CommandExecutionStatus.Complete);
             kernelEvent.Wait(); // Blocks until kernel completion
 
             var elapsedMicroSeconds = sw.Elapsed.TotalMicroseconds;

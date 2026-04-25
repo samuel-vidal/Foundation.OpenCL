@@ -165,7 +165,7 @@ namespace Foundation.OpenCL
 
         #region User Events
 
-        public Event CreateEvent()
+        public Event CreateUserEvent()
         {
             var handle = OpenCLNative.CreateUserEvent(Handle, out var errorCode);
             errorCode.ThrowIfUnsuccessful();

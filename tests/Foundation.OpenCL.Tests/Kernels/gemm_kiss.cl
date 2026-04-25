@@ -1,4 +1,7 @@
 ﻿
+
+#define __double_buffer
+
 __attribute__((intel_reqd_sub_group_size(32)))
 kernel void gemm_kiss(
     global half* c,				// output_dim x batch_size	(col major)
@@ -14,22 +17,35 @@ kernel void gemm_kiss(
 	const int input_dim = 2048;
 	const int output_dim = 2048;
 	const int warp_size = 32;
-	const int max_batch_size = 16;
+	const int max_batch_size = 32;
 
 	const global uint * pa = (global uint * )(a + i * input_dim);
 	const global uint * pb = (global uint * )b;
 
-	const uint * last_b = (global uint*) (b+ input_dim);
+	const uint * last_a = (global uint*) (a+ (i + 1) *input_dim);
 	const int increment = 8 * warp_size;
 
 	private float acc[max_batch_size];
 
 	for(int j = 0; j < batch_size; j ++) acc[j] = 0.0f;
 
+#ifdef __double_buffer
+	private uint8 va = intel_sub_group_block_read8(pa);
+#endif
+
 	do
 	{
+
+	
+#ifndef __double_buffer
 		private uint8 va = intel_sub_group_block_read8(pa);
+#endif
+
 		half16 weights = as_half16(va);
+
+#ifdef __double_buffer
+		if (pa + increment < last_a) va = intel_sub_group_block_read8(pa + increment);
+#endif
 
 		for(int j = 0; j < batch_size ; j ++)
 		{
@@ -46,7 +62,7 @@ kernel void gemm_kiss(
 
 		pa += increment;
 		pb += increment;
-	} while(pb < last_b);
+	} while(pa < last_a);
 
 	for(int j = 0; j < batch_size ; j ++) acc[j] = sub_group_reduce_add(acc[j]);
 

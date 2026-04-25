@@ -195,7 +195,7 @@ namespace Foundation.OpenCL.Tests
             var eventList = new List<Event>();
 
 
-            var start = context.CreateEvent();
+            var start = context.CreateUserEvent();
             eventList.Add(start);
 
             var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [start]);
@@ -215,7 +215,7 @@ namespace Foundation.OpenCL.Tests
             queue.Flush();
 
             var sw = Stopwatch.StartNew();
-            start.SetEvenStatus(CommandExecutionStatus.Complete);
+            start.SetEventStatus(CommandExecutionStatus.Complete);
 
             queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
             Console.WriteLine($"took {sw.Elapsed}");

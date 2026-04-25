@@ -14,7 +14,13 @@ namespace Shell
         {
             var test = new IntelMxmIntrinsicsTests();
 
-            test.Test_gemm_kiss();
+            for (int i = 1; i <= 32; i *= 2)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    test.Test_gemm_kiss(32);
+                }
+            }
 
 
             // This small exe can be used with VTune profiler
@@ -147,7 +153,7 @@ namespace Shell
             // 9. Execute kernel with proper event synchronization
 
             var eventList = new List<Event>();
-            var startEvent = context.CreateEvent();
+            var startEvent = context.CreateUserEvent();
             eventList.Add(startEvent);
             var lastEvent = startEvent;
             
@@ -170,7 +176,7 @@ namespace Shell
 
             var sw = Stopwatch.StartNew();
 
-            startEvent.SetEvenStatus(CommandExecutionStatus.Complete);
+            startEvent.SetEventStatus(CommandExecutionStatus.Complete);
 
             lastEvent.Wait(); // Blocks until kernel completion
 
