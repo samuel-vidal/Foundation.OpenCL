@@ -42,21 +42,19 @@ namespace Foundation.OpenCL
 
         public void SetEventCallback(CommandExecutionStatus status, Action callback)
         {
+            GCHandle managed = default;
+
             void Hook(Handle<Event> handle, CommandExecutionStatus _, void* __)
             {
-                try { callback(); } catch { }
+                try { callback(); } catch { } finally { managed.Free(); }
             }
 
-            var managed = GCHandle.Alloc(Hook);
+            managed = GCHandle.Alloc(Hook);
 
             try
             {
                 OpenCLNative.SetEventCallback(Handle, status, (void*)Marshal.GetFunctionPointerForDelegate(Hook), null)
                     .ThrowIfUnsuccessful();
-
-                // this doesn't happen if there is an exception above:
-
-                OnDispose += () => managed.Free();
             }
             catch
             {
