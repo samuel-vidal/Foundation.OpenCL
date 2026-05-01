@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Foundation.OpenCL
 {
@@ -40,25 +41,47 @@ namespace Foundation.OpenCL
         public void SetEventStatus(CommandExecutionStatus status)
             => OpenCLNative.SetUserEventStatus(Handle, status).ThrowIfUnsuccessful();
 
-        public void SetEventCallback(CommandExecutionStatus status, Action callback)
-        {
-            GCHandle managed = default;
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void EventCallback(Handle<Event> handle, CommandExecutionStatus status, void * data); 
 
-            void Hook(Handle<Event> handle, CommandExecutionStatus _, void* __)
+        private class EventCallbackClosure : IDisposable
+        {
+            private Action? callback;
+            private GCHandle managed;
+
+            public EventCallback Delegate { get; }
+
+            public EventCallbackClosure(Action callback)
             {
-                try { callback(); } catch { } finally { managed.Free(); }
+                this.callback = callback;
+                managed = GCHandle.Alloc(this);
+                Delegate = Invoke;
             }
 
-            managed = GCHandle.Alloc(Hook);
+            private void Invoke(Handle<Event> handle, CommandExecutionStatus status, void* data)
+            {
+                try { callback(); } catch { } finally { Dispose(); }
+            }
+
+            public void Dispose()
+            {
+                managed.Free();
+                callback = null;
+            }
+        }
+
+        public void SetEventCallback(CommandExecutionStatus status, Action callback)
+        {
+            var closure = new EventCallbackClosure(callback);
 
             try
             {
-                OpenCLNative.SetEventCallback(Handle, status, (void*)Marshal.GetFunctionPointerForDelegate(Hook), null)
+                OpenCLNative.SetEventCallback(Handle, status, (void*)Marshal.GetFunctionPointerForDelegate(closure.Delegate), null)
                     .ThrowIfUnsuccessful();
             }
             catch
             {
-                managed.Free();
+                closure.Dispose();
                 throw;
             }
         }
