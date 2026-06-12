@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace Foundation.OpenCL
 {
@@ -26,9 +26,10 @@ namespace Foundation.OpenCL
 
     #endregion
 
-    public sealed unsafe class Event(Handle<Event> handle)
-        : InformationNode<Event, EventInfo>(handle), IReify<Event>
+    public sealed unsafe class Event : InformationNode<Event, EventInfo>, IReify<Event>
     {
+        private Event(Handle<Event> handle) : base(handle) { }
+
         public static void Wait(params ReadOnlySpan<Event> events)
         {
             var handles = stackalloc Handle<Event>[events.Length];
@@ -96,7 +97,44 @@ namespace Foundation.OpenCL
         protected override void GetInfo(EventInfo paramName, nuint paramValueSize, void* paramValue, out nuint paramValueSizeRet)
              => OpenCLNative.GetEventInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
-        public static Event Reify(Handle<Event> handle) => new(handle);
+        private static readonly LinkedList<IDecorator<Event>> decorators = new();
+
+        public static Event Reify(Handle<Event> handle)
+        {
+            var evt = new Event (handle);
+
+            lock (decorators)
+            {
+                foreach (var decorator in decorators)
+                {
+                    evt = decorator.Decorate(evt);
+                }
+            }
+
+            return evt;
+        }
+
+        private class Remove(LinkedListNode<IDecorator<Event>> node) : IDisposable
+        {
+            public void Dispose()
+            {
+                lock (decorators) decorators.Remove(node);
+            }
+        }
+
+        public static IDisposable AddDecorator(IDecorator<Event> decorator)
+        {
+            lock (decorators)
+            {
+                var node = decorators.AddLast(decorator);
+                return new Remove(node);
+            }
+        }
+    }
+
+    public interface IDecorator<T>
+    {
+        T Decorate(T item);
     }
 
     public static class EventExtensions

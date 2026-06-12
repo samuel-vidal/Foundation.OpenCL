@@ -5,3 +5,4 @@ obj
 bin
 /src/Iridium.OpenCL/*.user
 /*.user
+/debug.log
