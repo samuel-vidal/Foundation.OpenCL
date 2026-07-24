@@ -436,7 +436,6 @@ namespace Foundation.OpenCL
         public static Context Reify(Handle<Context> handle) => new(handle);
     }
 
-
     public static class ContextExtensions
     {
         public static int GetReferenceCount(this Context queue)
