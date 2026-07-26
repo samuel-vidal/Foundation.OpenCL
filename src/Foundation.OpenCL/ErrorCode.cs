@@ -117,6 +117,7 @@ namespace Foundation.OpenCL
 
     public static class ErrorCodeExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ThrowIfUnsuccessful(this ErrorCode errorCode, string? message = null, [CallerMemberName] string methodName = "")
         {
             if (errorCode != ErrorCode.Success)

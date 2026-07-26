@@ -22,10 +22,7 @@ namespace Shell
                 }
             }
 
-
             // This small exe can be used with VTune profiler
-
-
 
             //Benchmark(
             //    2048,
@@ -38,7 +35,6 @@ namespace Shell
             var test = new IntelMxmIntrinsicsTests();
 
             test.Test_1_2048_2048_fused_layer_norm_shuffled();
-
         }
 
         public static void Benchmark(
@@ -166,8 +162,8 @@ namespace Shell
                 kernel.SetArgBuffer(1, activationBuffers[i]);
                 kernel.SetArgBuffer(2, weightBuffers[i]);
 
-                lastEvent = queue.EnqueueNdRangeKernel(
-                    kernel, globalOffset, globalSize, localSize, [lastEvent]);
+                lastEvent = queue.EnqueueNdRangeKernelEvent(
+                    kernel, globalOffset, globalSize, localSize, lastEvent);
 
                 eventList.Add(lastEvent);
             }

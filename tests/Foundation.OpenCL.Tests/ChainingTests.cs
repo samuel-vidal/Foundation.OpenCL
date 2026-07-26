@@ -81,9 +81,9 @@ namespace Foundation.OpenCL.Tests
 
             var eventList = new List<Event>();
 
-            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]);
+            var completion = queue.EnqueueNdRangeKernelEvent(kernel0, [0], [32], [32]);
             eventList.Add(completion);
-            completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+            completion = queue.EnqueueNdRangeKernelEvent(kernel1, [0], [32], [32], completion);
             eventList.Add(completion);
 
             Event.Wait(completion);
@@ -91,13 +91,13 @@ namespace Foundation.OpenCL.Tests
 
             for (var i = 2; i < iterations; i+=2)
             {
-                completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [completion]);
+                completion = queue.EnqueueNdRangeKernelEvent(kernel0, [0], [32], [32], completion);
                 eventList.Add(completion);
-                completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+                completion = queue.EnqueueNdRangeKernelEvent(kernel1, [0], [32], [32], completion);
                 eventList.Add(completion);
             }
 
-            queue.EnqueueReadBufferBlocking(a_buffer, 0, actual.ByteSize, actual.Rep, [completion]);
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, actual.ByteSize, actual.Rep, completion);
 
             Console.WriteLine($"took {sw.Elapsed}");
 
@@ -198,16 +198,16 @@ namespace Foundation.OpenCL.Tests
             var start = context.CreateUserEvent();
             eventList.Add(start);
 
-            var completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [start]);
+            var completion = queue.EnqueueNdRangeKernelEvent(kernel0, [0], [32], [32], start);
             eventList.Add(completion);
-            completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+            completion = queue.EnqueueNdRangeKernelEvent(kernel1, [0], [32], [32], completion);
             eventList.Add(completion);
 
             for (var i = 2; i < iterations; i+=2)
             {
-                completion = queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32], [completion]);
+                completion = queue.EnqueueNdRangeKernelEvent(kernel0, [0], [32], [32], completion);
                 eventList.Add(completion);
-                completion = queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32], [completion]);
+                completion = queue.EnqueueNdRangeKernelEvent(kernel1, [0], [32], [32], completion);
                 eventList.Add(completion);
             }
 
@@ -217,7 +217,7 @@ namespace Foundation.OpenCL.Tests
             var sw = Stopwatch.StartNew();
             start.SetEventStatus(CommandExecutionStatus.Complete);
 
-            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, [completion]);
+            queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep, completion);
             Console.WriteLine($"took {sw.Elapsed}");
 
             queue.Finish();
@@ -309,16 +309,16 @@ namespace Foundation.OpenCL.Tests
             var eventList = new List<Event>();
 
 
-            eventList.Add(queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]));
-            eventList.Add(queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32]));
+            eventList.Add(queue.EnqueueNdRangeKernelEvent(kernel0, [0], [32], [32]));
+            eventList.Add(queue.EnqueueNdRangeKernelEvent(kernel1, [0], [32], [32]));
 
             Event.Wait(eventList[^1]);
             var sw = Stopwatch.StartNew();
 
             for (var i = 2; i < iterations; i += 2)
             {
-                eventList.Add(queue.EnqueueNdRangeKernel(kernel0, [0], [32], [32]));
-                eventList.Add(queue.EnqueueNdRangeKernel(kernel1, [0], [32], [32]));
+                eventList.Add(queue.EnqueueNdRangeKernelEvent(kernel0, [0], [32], [32]));
+                eventList.Add(queue.EnqueueNdRangeKernelEvent(kernel1, [0], [32], [32]));
             }
 
             queue.EnqueueReadBufferBlocking(a_buffer, 0, result_actual.ByteSize, result_actual.Rep);

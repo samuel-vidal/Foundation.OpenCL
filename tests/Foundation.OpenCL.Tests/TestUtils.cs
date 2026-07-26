@@ -252,8 +252,8 @@ namespace Foundation.OpenCL.Tests
 
             // 9. Execute kernel with proper event synchronization
 
-            using var kernelEvent = queue.EnqueueNdRangeKernel(
-                kernel, globalOffset, globalSize, localSize, [start]);
+            using var kernelEvent = queue.EnqueueNdRangeKernelEvent(
+                kernel, globalOffset, globalSize, localSize, start);
 
             queue.Flush();
 

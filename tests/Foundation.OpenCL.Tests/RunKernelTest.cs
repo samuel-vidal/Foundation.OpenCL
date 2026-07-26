@@ -182,7 +182,7 @@ namespace Foundation.OpenCL.Tests
             // 9. Execute kernel with proper event synchronization
             var sw = Stopwatch.StartNew();
 
-            using var kernelEvent = queue.EnqueueNdRangeKernel(
+            using var kernelEvent = queue.EnqueueNdRangeKernelEvent(
                 kernel, globalOffset, globalSize, localSize);
 
             kernelEvent.Wait(); // Blocks until kernel completion

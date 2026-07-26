@@ -56,88 +56,312 @@ namespace Foundation.OpenCL
 
         #region Buffer Operations
 
-        public Event EnqueueReadBuffer(Buffer buffer, nuint offset, nuint size, void* hostPtr, ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueReadBuffer(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+            EnqueueReadBufferImpl(
+                buffer,
+                offset,
+                size,
+                hostPtr,
+                withEvent: false,
+                blocking: false,
+                waitEvents);
+        }
 
-            Handle<Event> eventHandle;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueReadBufferEvent(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            params ReadOnlySpan<Event> waitEvents)
+        {
+            return EnqueueReadBufferImpl(
+                buffer,
+                offset,
+                size,
+                hostPtr,
+                withEvent: true,
+                blocking: false,
+                waitEvents)!;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueReadBufferBlocking(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            params ReadOnlySpan<Event> waitEvents)
+        {
+            EnqueueReadBufferImpl(
+                buffer,
+                offset,
+                size,
+                hostPtr,
+                withEvent: false,
+                blocking: true,
+                waitEvents);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueReadBufferImpl(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            bool withEvent,
+            bool blocking,
+            ReadOnlySpan<Event> waitEvents)
+        {
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++)
+                    eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
+
+            Handle<Event> eventHandle = default;
             OpenCLNative.EnqueueReadBuffer(
-                    Handle, buffer.Handle, false, offset, size, hostPtr,
-                    waitEvents.Length,
-                    NullIfEmpty(waitEvents, eventHandles),
-                    &eventHandle)
+                    Handle, buffer.Handle, blocking, offset, size, hostPtr,
+                    waitEvents.Length, waitEventsPtr, withEvent ? &eventHandle : null)
                 .ThrowIfUnsuccessful();
 
-            return Event.Reify(eventHandle);
+            return withEvent ? Event.Reify(eventHandle) : null;
         }
 
-        public void EnqueueReadBufferBlocking(Buffer buffer, nuint offset, nuint size, void* hostPtr, ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueWriteBuffer(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
-
-            OpenCLNative.EnqueueReadBuffer(
-                    Handle, buffer.Handle, true, offset, size, hostPtr,
-                    waitEvents.Length, NullIfEmpty(waitEvents, eventHandles), null)
-                .ThrowIfUnsuccessful();
+            EnqueueWriteBufferImpl(
+                buffer,
+                offset,
+                size,
+                hostPtr,
+                withEvent: false,
+                blocking: false,
+                waitEvents);
         }
 
-        public Event EnqueueWriteBuffer(Buffer buffer, nuint offset, nuint size, void* hostPtr, ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueWriteBufferEvent(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+            return EnqueueWriteBufferImpl(
+                buffer,
+                offset,
+                size,
+                hostPtr,
+                withEvent: true,
+                blocking: false,
+                waitEvents)!;
+        }
 
-            Handle<Event> eventHandle;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueWriteBufferBlocking(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            params ReadOnlySpan<Event> waitEvents)
+        {
+            EnqueueWriteBufferImpl(
+                buffer,
+                offset,
+                size,
+                hostPtr,
+                withEvent: false,
+                blocking: true,
+                waitEvents);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueWriteBufferImpl(
+            Buffer buffer,
+            nuint offset,
+            nuint size,
+            void* hostPtr,
+            bool withEvent,
+            bool blocking,
+            ReadOnlySpan<Event> waitEvents)
+        {
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++)
+                    eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
+
+            Handle<Event> eventHandle = default;
             OpenCLNative.EnqueueWriteBuffer(
-                    Handle, buffer.Handle, false, offset, size, hostPtr,
-                    waitEvents.Length, NullIfEmpty(waitEvents, eventHandles), &eventHandle)
+                    Handle, buffer.Handle, blocking, offset, size, hostPtr,
+                    waitEvents.Length, waitEventsPtr, withEvent ? &eventHandle : null)
                 .ThrowIfUnsuccessful();
 
-            return Event.Reify(eventHandle);
+            return withEvent ? Event.Reify(eventHandle) : null;
         }
 
-        public void EnqueueWriteBufferBlocking(Buffer buffer, nuint offset, nuint size, void* hostPtr, ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueCopyBuffer(
+            Buffer source,
+            Buffer destination,
+            nuint srcOffset,
+            nuint dstOffset,
+            nuint size,
+            params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
-
-            OpenCLNative.EnqueueWriteBuffer(
-                    Handle, buffer.Handle, true, offset, size, hostPtr,
-                    waitEvents.Length, eventHandles, null)
-                .ThrowIfUnsuccessful();
+            EnqueueCopyBufferImpl(
+                source,
+                destination,
+                srcOffset,
+                dstOffset,
+                size,
+                withEvent: false,
+                waitEvents);
         }
 
-        public Event EnqueueCopyBuffer(Buffer source, Buffer destination, nuint srcOffset, nuint dstOffset, nuint size, ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueCopyBufferEvent(
+            Buffer source,
+            Buffer destination,
+            nuint srcOffset,
+            nuint dstOffset,
+            nuint size,
+            params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+            return EnqueueCopyBufferImpl(
+                source,
+                destination,
+                srcOffset,
+                dstOffset,
+                size,
+                withEvent: true,
+                waitEvents)!;
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueCopyBufferImpl(
+            Buffer source,
+            Buffer destination,
+            nuint srcOffset,
+            nuint dstOffset,
+            nuint size,
+            bool withEvent,
+            ReadOnlySpan<Event> waitEvents)
+        {
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++)
+                    eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
+
+            Handle<Event> eventHandle = default;
             OpenCLNative.EnqueueCopyBuffer(
-                Handle, source.Handle, destination.Handle, srcOffset, dstOffset, size,
-                waitEvents.Length, NullIfEmpty(waitEvents, eventHandles), out var eventHandle)
+                    Handle,
+                    source.Handle,
+                    destination.Handle,
+                    srcOffset,
+                    dstOffset,
+                    size,
+                    waitEvents.Length,
+                    waitEventsPtr,
+                    withEvent ? &eventHandle : null)
                 .ThrowIfUnsuccessful();
 
-            return Event.Reify(eventHandle);
+            return withEvent ? Event.Reify(eventHandle) : null;
         }
 
-        public Event EnqueueFillBuffer<T>(
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueFillBuffer<T>(
             Buffer buffer,
             T pattern,
             nuint offset,
             nuint size,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
             where T : unmanaged
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+            EnqueueFillBufferImpl(
+                buffer,
+                pattern,
+                offset,
+                size,
+                false,
+                waitEvents);
+        }
 
-                OpenCLNative.EnqueueFillBuffer(
-                    Handle, buffer.Handle, &pattern, (nuint)sizeof(T), offset, size,
-                    waitEvents.Length, NullIfEmpty(waitEvents, eventHandles), out var eventHandle)
-                    .ThrowIfUnsuccessful();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueFillBufferEvent<T>(
+            Buffer buffer,
+            T pattern,
+            nuint offset,
+            nuint size,
+            params ReadOnlySpan<Event> waitEvents)
+            where T : unmanaged
+        {
+            return EnqueueFillBufferImpl(
+                buffer,
+                pattern,
+                offset,
+                size,
+                true,
+                waitEvents)!;
+        }
 
-                return Event.Reify(eventHandle);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueFillBufferImpl<T>(
+            Buffer buffer,
+            T pattern,
+            nuint offset,
+            nuint size,
+            bool withEvent,
+            params ReadOnlySpan<Event> waitEvents)
+            where T : unmanaged
+        {
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)          // potentially optimized away if known at call site
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
+
+            Handle<Event> eventHandle = default; 
+            OpenCLNative.EnqueueFillBuffer(
+                    Handle,
+                    buffer.Handle,
+                    &pattern,
+                    (nuint)sizeof(T),
+                    offset,
+                    size,
+                    waitEvents.Length,
+                    waitEventsPtr,
+                    withEvent ? &eventHandle : null)
+                .ThrowIfUnsuccessful();
+
+            return withEvent ? Event.Reify(eventHandle) : null;
         }
 
         #region Rectangular Buffer Operations
@@ -150,7 +374,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> targetPitch,
             ReadOnlySpan<nuint> sourcePitch,
             void* hostPtr,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             return EnqueueReadBufferRectImplementation(memObject, false, targetOrigin, sourceOrigin, region,
                 targetPitch, sourcePitch, hostPtr, waitEvents)!;
@@ -164,7 +388,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> targetPitch,
             ReadOnlySpan<nuint> sourcePitch,
             void* hostPtr,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             EnqueueReadBufferRectImplementation(memObject, true, targetOrigin, sourceOrigin, region,
                 targetPitch, sourcePitch, hostPtr, waitEvents);
@@ -179,7 +403,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> targetPitch,
             ReadOnlySpan<nuint> sourcePitch,
             void* hostPtr,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -230,7 +454,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> targetPitches,
             ReadOnlySpan<nuint> sourcePitch,
             void* hostPtr,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             return EnqueueWriteBufferRectImplementation(memObject, false, targetOrigin, sourceOrigin, region,
                 targetPitches, sourcePitch, hostPtr, waitEvents)!;
@@ -244,7 +468,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> targetPitch,
             ReadOnlySpan<nuint> sourcePitch,
             void* hostPtr,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             EnqueueWriteBufferRectImplementation(memObject, true, targetOrigin, sourceOrigin, region,
                 targetPitch, sourcePitch, hostPtr, waitEvents);
@@ -259,7 +483,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> targetPitch,
             ReadOnlySpan<nuint> sourcePitch,
             void* hostPtr,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -310,7 +534,7 @@ namespace Foundation.OpenCL
             ReadOnlySpan<nuint> region,
             ReadOnlySpan<nuint> targetPitch,
             ReadOnlySpan<nuint> sourcePitch,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -363,7 +587,14 @@ namespace Foundation.OpenCL
 
         #region Image Operations
 
-        public Event EnqueueReadImage(Image image, nuint* origin, nuint* region, nuint rowPitch, nuint slicePitch, void* ptr, ReadOnlySpan<Event> waitEvents = default)
+        public Event EnqueueReadImage(
+            Image image,
+            nuint* origin,
+            nuint* region,
+            nuint rowPitch,
+            nuint slicePitch,
+            void* ptr,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -377,7 +608,14 @@ namespace Foundation.OpenCL
             return Event.Reify(eventHandle);
         }
 
-        public void EnqueueReadImageBlocking(Image image, nuint* origin, nuint* region, nuint rowPitch, nuint slicePitch, void* ptr, ReadOnlySpan<Event> waitEvents = default)
+        public void EnqueueReadImageBlocking(
+            Image image,
+            nuint* origin,
+            nuint* region,
+            nuint rowPitch,
+            nuint slicePitch,
+            void* ptr,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -388,7 +626,14 @@ namespace Foundation.OpenCL
                 .ThrowIfUnsuccessful();
         }
 
-        public Event EnqueueWriteImage(Image image, nuint* origin, nuint* region, nuint rowPitch, nuint slicePitch, void* ptr, ReadOnlySpan<Event> waitEvents = default)
+        public Event EnqueueWriteImage(
+            Image image,
+            nuint* origin,
+            nuint* region,
+            nuint rowPitch,
+            nuint slicePitch,
+            void* ptr,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -402,7 +647,14 @@ namespace Foundation.OpenCL
             return Event.Reify(eventHandle);
         }
 
-        public void EnqueueWriteImageBlocking(Image image, nuint* origin, nuint* region, nuint rowPitch, nuint slicePitch, void* ptr, ReadOnlySpan<Event> waitEvents = default)
+        public void EnqueueWriteImageBlocking(
+            Image image,
+            nuint* origin,
+            nuint* region,
+            nuint rowPitch,
+            nuint slicePitch,
+            void* ptr,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -413,7 +665,13 @@ namespace Foundation.OpenCL
                 .ThrowIfUnsuccessful();
         }
 
-        public Event EnqueueCopyImage(Image source, Image destination, nuint* srcOrigin, nuint* dstOrigin, nuint* region, ReadOnlySpan<Event> waitEvents = default)
+        public Event EnqueueCopyImage(
+            Image source,
+            Image destination,
+            nuint* srcOrigin,
+            nuint* dstOrigin,
+            nuint* region,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -426,7 +684,12 @@ namespace Foundation.OpenCL
             return Event.Reify(eventHandle);
         }
 
-        public Event EnqueueFillImage(Image image, void* fillColor, nuint* origin, nuint* region, ReadOnlySpan<Event> waitEvents = default)
+        public Event EnqueueFillImage(
+            Image image,
+            void* fillColor,
+            nuint* origin,
+            nuint* region,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -443,7 +706,13 @@ namespace Foundation.OpenCL
 
         #region Mapping Operations
 
-        public void* EnqueueMapBuffer(Buffer buffer, MapFlags flags, nuint offset, nuint size, out Event mapEvent, ReadOnlySpan<Event> waitEvents = default)
+        public void* EnqueueMapBuffer(
+            Buffer buffer,
+            MapFlags flags,
+            nuint offset,
+            nuint size,
+            out Event mapEvent,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -458,7 +727,13 @@ namespace Foundation.OpenCL
             return ptr;
         }
 
-        public void* EnqueueMapBufferBlocking(Buffer buffer, bool blocking, MapFlags flags, nuint offset, nuint size, ReadOnlySpan<Event> waitEvents = default)
+        public void* EnqueueMapBufferBlocking(
+            Buffer buffer,
+            bool blocking,
+            MapFlags flags,
+            nuint offset,
+            nuint size,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -471,7 +746,15 @@ namespace Foundation.OpenCL
             return ptr;
         }
 
-        public void* EnqueueMapImage(Image image, MapFlags flags, nuint* origin, nuint* region, out nuint rowPitch, out nuint slicePitch, out Event mapEvent, ReadOnlySpan<Event> waitEvents = default)
+        public void* EnqueueMapImage(
+            Image image,
+            MapFlags flags,
+            nuint* origin,
+            nuint* region,
+            out nuint rowPitch,
+            out nuint slicePitch,
+            out Event mapEvent,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -486,7 +769,14 @@ namespace Foundation.OpenCL
             return ptr;
         }
 
-        public void* EnqueueMapImageBlocking(Image image, MapFlags flags, nuint* origin, nuint* region, out nuint rowPitch, out nuint slicePitch, ReadOnlySpan<Event> waitEvents = default)
+        public void* EnqueueMapImageBlocking(
+            Image image,
+            MapFlags flags,
+            nuint* origin,
+            nuint* region,
+            out nuint rowPitch,
+            out nuint slicePitch,
+            params ReadOnlySpan<Event> waitEvents)
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
             for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
@@ -499,7 +789,10 @@ namespace Foundation.OpenCL
             return ptr;
         }
 
-        public Event EnqueueUnmapMemObject<TMemObject>(TMemObject memObject, void* mappedPtr, ReadOnlySpan<Event> waitEvents = default)
+        public Event EnqueueUnmapMemObject<TMemObject>(
+            TMemObject memObject,
+            void* mappedPtr,
+            params ReadOnlySpan<Event> waitEvents)
             where TMemObject : BaseMemoryObject<TMemObject>, IReify<TMemObject, MemoryObject>
         {
             var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
@@ -517,7 +810,10 @@ namespace Foundation.OpenCL
 
         #region Migration & SVM Operations
 
-        public Event EnqueueMigrateMemObjects<TMemObject>(ReadOnlySpan<TMemObject> memObjects, MemMigrationFlags flags, ReadOnlySpan<Event> waitEvents = default)
+        public Event EnqueueMigrateMemObjects<TMemObject>(
+            ReadOnlySpan<TMemObject> memObjects,
+            MemMigrationFlags flags,
+            params ReadOnlySpan<Event> waitEvents)
             where TMemObject : BaseMemoryObject<TMemObject>, IReify<TMemObject, MemoryObject>
         {
             var memHandles = stackalloc Handle<MemoryObject>[memObjects.Length];
@@ -538,45 +834,130 @@ namespace Foundation.OpenCL
 
         #region Kernel Execution
 
-        public Event EnqueueNdRangeKernel(
+        //public Event EnqueueNdRangeKernel(
+        //    Kernel kernel,
+        //    ReadOnlySpan<nuint> globalWorkOffset,
+        //    ReadOnlySpan<nuint> globalWorkSize,
+        //    ReadOnlySpan<nuint> localWorkSize,
+        //    ReadOnlySpan<Event> waitEvents = default)
+        //{
+        //    var workDim = globalWorkSize.Length;
+
+        //    // 1. Validate inputs only if they are provided
+        //    if (!globalWorkOffset.IsEmpty && globalWorkOffset.Length != workDim)
+        //        throw new ArgumentException("Global offset dimension must match work dimension", nameof(globalWorkOffset));
+
+        //    if (!localWorkSize.IsEmpty && localWorkSize.Length != workDim)
+        //        throw new ArgumentException("Local work size dimension must match work dimension", nameof(localWorkSize));
+
+        //    // 2. Prepare events
+        //    var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+        //    for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+
+        //    // Pin the work size arrays
+        //    fixed (nuint* globalOffsetPtr = globalWorkOffset)
+        //    fixed (nuint* globalSizePtr = globalWorkSize)
+        //    fixed (nuint* localSizePtr = localWorkSize)
+        //    {
+        //        OpenCLNative.EnqueueNdRangeKernel(
+        //            Handle,
+        //            kernel.Handle,
+        //            workDim,
+        //            // Explicitly pass NULL if the span is empty to prevent OpenCL 
+        //            // from reading 'workDim' items from a valid-but-empty pointer.
+        //            NullIfEmpty(globalWorkOffset, globalOffsetPtr),
+        //            globalSizePtr,
+        //            NullIfEmpty(localWorkSize, localSizePtr),
+        //            waitEvents.Length,
+        //            NullIfEmpty(waitEvents, eventHandles),
+        //            out var eventHandle).ThrowIfUnsuccessful();
+
+        //        return Event.Reify(eventHandle);
+        //    }
+        //}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueNdRangeKernel(
+    Kernel kernel,
+    ReadOnlySpan<nuint> globalWorkOffset,
+    ReadOnlySpan<nuint> globalWorkSize,
+    ReadOnlySpan<nuint> localWorkSize,
+    params ReadOnlySpan<Event> waitEvents)
+        {
+            EnqueueNdRangeKernelImpl(
+                kernel,
+                globalWorkOffset,
+                globalWorkSize,
+                localWorkSize,
+                withEvent: false,
+                waitEvents);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueNdRangeKernelEvent(
             Kernel kernel,
             ReadOnlySpan<nuint> globalWorkOffset,
             ReadOnlySpan<nuint> globalWorkSize,
             ReadOnlySpan<nuint> localWorkSize,
-            ReadOnlySpan<Event> waitEvents = default)
+            params ReadOnlySpan<Event> waitEvents)
+        {
+            return EnqueueNdRangeKernelImpl(
+                kernel,
+                globalWorkOffset,
+                globalWorkSize,
+                localWorkSize,
+                withEvent: true,
+                waitEvents)!;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueNdRangeKernelImpl(
+            Kernel kernel,
+            ReadOnlySpan<nuint> globalWorkOffset,
+            ReadOnlySpan<nuint> globalWorkSize,
+            ReadOnlySpan<nuint> localWorkSize,
+            bool withEvent,
+            ReadOnlySpan<Event> waitEvents)
         {
             var workDim = globalWorkSize.Length;
 
-            // 1. Validate inputs only if they are provided
+            // 1. Validation
             if (!globalWorkOffset.IsEmpty && globalWorkOffset.Length != workDim)
                 throw new ArgumentException("Global offset dimension must match work dimension", nameof(globalWorkOffset));
 
             if (!localWorkSize.IsEmpty && localWorkSize.Length != workDim)
                 throw new ArgumentException("Local work size dimension must match work dimension", nameof(localWorkSize));
 
-            // 2. Prepare events
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+            // 2. Prepare event wait list
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++)
+                    eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
 
-            // Pin the work size arrays
+            // 3. Pin spans and call native entry point
             fixed (nuint* globalOffsetPtr = globalWorkOffset)
             fixed (nuint* globalSizePtr = globalWorkSize)
             fixed (nuint* localSizePtr = localWorkSize)
             {
+                Handle<Event> eventHandle = default;
+
                 OpenCLNative.EnqueueNdRangeKernel(
                     Handle,
                     kernel.Handle,
                     workDim,
-                    // Explicitly pass NULL if the span is empty to prevent OpenCL 
-                    // from reading 'workDim' items from a valid-but-empty pointer.
-                    NullIfEmpty(globalWorkOffset, globalOffsetPtr),
+                    globalWorkOffset.IsEmpty ? null : globalOffsetPtr,
                     globalSizePtr,
-                    NullIfEmpty(localWorkSize, localSizePtr),
+                    localWorkSize.IsEmpty ? null : localSizePtr,
                     waitEvents.Length,
-                    NullIfEmpty(waitEvents, eventHandles),
-                    out var eventHandle).ThrowIfUnsuccessful();
+                    waitEventsPtr,
+                    withEvent ? &eventHandle : null)
+                .ThrowIfUnsuccessful();
 
-                return Event.Reify(eventHandle);
+                return withEvent ? Event.Reify(eventHandle) : null;
             }
         }
 

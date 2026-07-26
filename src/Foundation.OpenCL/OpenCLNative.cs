@@ -479,7 +479,7 @@ namespace Foundation.OpenCL
             nuint size,
             int numEventsInWaitList,
             Handle<Event>* eventWaitList,
-        out Handle<Event> userEvent);
+            Handle<Event>* userEvent);
 
         // cl_int clEnqueueCopyBuffer(cl_command_queue command_queue,
         //                            cl_mem src_buffer, cl_mem dst_buffer,
@@ -498,7 +498,7 @@ namespace Foundation.OpenCL
             nuint size,
             int numEventsInWaitList,
             Handle<Event>* eventWaitList,
-        out Handle<Event> userEvent);
+            Handle<Event>* userEvent);
 
         // cl_int clEnqueueCopyBufferRect(cl_command_queue command_queue,
         //                                cl_mem src_buffer, cl_mem dst_buffer,
@@ -526,7 +526,7 @@ namespace Foundation.OpenCL
             nuint dstSlicePitch,
             int numEventsInWaitList,
             Handle<Event>* eventWaitList,
-        out Handle<Event> userEvent);
+            out Handle<Event> userEvent);
 
         #endregion
 
@@ -1006,7 +1006,7 @@ namespace Foundation.OpenCL
             nuint* localWorkSize,
             int numEventsInWaitList,
             Handle<Event>* eventWaitList,
-            out Handle<Event> userEvent);
+            Handle<Event>* userEvent);
 
         // cl_int clEnqueueNativeKernel(cl_command_queue command_queue, void (CL_CALLBACK *user_func)(void *), void *args, size_t cb_args, cl_uint num_mem_objects, const cl_mem *mem_list, const void **args_mem_loc, cl_uint num_events_in_wait_list, const cl_event *event_wait_list, cl_event *event)
         [DllImport(OpenClLibrary, EntryPoint = "clEnqueueNativeKernel", CallingConvention = CallingConvention.Cdecl)]
