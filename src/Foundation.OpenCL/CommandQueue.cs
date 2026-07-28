@@ -878,11 +878,11 @@ namespace Foundation.OpenCL
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EnqueueNdRangeKernel(
-    Kernel kernel,
-    ReadOnlySpan<nuint> globalWorkOffset,
-    ReadOnlySpan<nuint> globalWorkSize,
-    ReadOnlySpan<nuint> localWorkSize,
-    params ReadOnlySpan<Event> waitEvents)
+            Kernel kernel,
+            ReadOnlySpan<nuint> globalWorkOffset,
+            ReadOnlySpan<nuint> globalWorkSize,
+            ReadOnlySpan<nuint> localWorkSize,
+            params ReadOnlySpan<Event> waitEvents)
         {
             EnqueueNdRangeKernelImpl(
                 kernel,
@@ -1021,28 +1021,76 @@ namespace Foundation.OpenCL
 
         #region Marker & Barrier Operations
 
-        public Event EnqueueMarkerWithWaitList(ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueMarkerWithWaitList(params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
-
-            OpenCLNative.EnqueueMarkerWithWaitList(
-                Handle, waitEvents.Length, NullIfEmpty(waitEvents, eventHandles), out var eventHandle)
-                .ThrowIfUnsuccessful();
-
-            return Event.Reify(eventHandle);
+            EnqueueMarkerWithWaitListImpl(
+                withEvent: false, waitEvents);
         }
 
-        public Event EnqueueBarrierWithWaitList(ReadOnlySpan<Event> waitEvents = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueMarkerWithWaitListEvent(params ReadOnlySpan<Event> waitEvents)
         {
-            var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
-            for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+            return EnqueueMarkerWithWaitListImpl(
+                withEvent: true, waitEvents)!;
+        }
 
-            OpenCLNative.EnqueueBarrierWithWaitList(
-                Handle, waitEvents.Length, NullIfEmpty(waitEvents, eventHandles), out var eventHandle)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueMarkerWithWaitListImpl(
+            bool withEvent,
+            ReadOnlySpan<Event> waitEvents)
+        {
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)          // potentially optimized away if known at call site
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
+
+            Handle<Event> eventHandle = default;
+            OpenCLNative.EnqueueMarkerWithWaitList(
+                    Handle, waitEvents.Length, waitEventsPtr, withEvent ? &eventHandle : null)
                 .ThrowIfUnsuccessful();
 
-            return Event.Reify(eventHandle);
+            return withEvent ? Event.Reify(eventHandle) : null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnqueueBarrierWithWaitList(params ReadOnlySpan<Event> waitEvents)
+        {
+            EnqueueBarrierWithWaitListImpl(
+                withEvent: false,
+                waitEvents);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Event EnqueueBarrierWithWaitListEvent(params ReadOnlySpan<Event> waitEvents)
+        {
+            return EnqueueBarrierWithWaitListImpl(
+                withEvent: true,
+                waitEvents)!;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Event? EnqueueBarrierWithWaitListImpl(
+            bool withEvent,
+            ReadOnlySpan<Event> waitEvents)
+        {
+            Handle<Event>* waitEventsPtr = null;
+            if (waitEvents.Length > 0)          // potentially optimized away if known at call site
+            {
+                var eventHandles = stackalloc Handle<Event>[waitEvents.Length];
+                for (var i = 0; i < waitEvents.Length; i++) eventHandles[i] = waitEvents[i].Handle;
+                waitEventsPtr = eventHandles;
+            }
+
+            Handle<Event> eventHandle = default;
+            OpenCLNative.EnqueueBarrierWithWaitList(
+                    Handle, waitEvents.Length, waitEventsPtr, withEvent ? &eventHandle : null)
+                .ThrowIfUnsuccessful();
+
+            return withEvent ? Event.Reify(eventHandle) : null;
         }
 
         #endregion
