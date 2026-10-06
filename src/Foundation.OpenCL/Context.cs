@@ -64,16 +64,25 @@ namespace Foundation.OpenCL
                 propArray[pos++] = properties[i].Value;
                 propArray[pos] = 0;       // intentional
             }
+            var callbackLifecycle = new ErrorCallbackLifecycle(errorCallback);
+            try
+            {
+                var contextHandle = OpenCLNative.CreateContextFromType(
+                    propArray,
+                    deviceType,
+                    callbackLifecycle.MakeErrorCallbackPtr(),
+                    null, // user_data set to null
+                    out var errCodeRet);
 
-            var contextHandle = OpenCLNative.CreateContextFromType(
-                propArray,
-                deviceType,
-                MakeErrorCallbackPtr(errorCallback),
-                null, // user_data set to null
-                out var errCodeRet);
-
-            errCodeRet.ThrowIfUnsuccessful();
-            return Reify(contextHandle);
+                errCodeRet.ThrowIfUnsuccessful();
+                callbackLifecycle.Finish(contextHandle);
+                return Reify(contextHandle);
+            }
+            catch
+            {
+                callbackLifecycle.Dispose();
+                throw;
+            }
         }
 
         public static Context CreateContext(
@@ -92,25 +101,75 @@ namespace Foundation.OpenCL
             var deviceHandles = stackalloc Handle<Device>[devices.Length];
             for (var i = 0; i < devices.Length; i++) deviceHandles[i] = devices[i].Handle;
 
-            // clCreateContext returns the Handle and takes the error code as an out parameter
-            var contextHandle = OpenCLNative.CreateContext(
-                propArray,
-                devices.Length,
-                deviceHandles,
-                MakeErrorCallbackPtr(errorCallback),
-                null, // user_data set to null
-                out var errCodeRet);
+            var callbackLifecycle = new ErrorCallbackLifecycle(errorCallback);
+            try
+            {
+                // clCreateContext returns the Handle and takes the error code as an out parameter
+                var contextHandle = OpenCLNative.CreateContext(
+                    propArray,
+                    devices.Length,
+                    deviceHandles,
+                    callbackLifecycle.MakeErrorCallbackPtr(),
+                    null, // user_data set to null
+                    out var errCodeRet);
 
-            errCodeRet.ThrowIfUnsuccessful();
-            return Reify(contextHandle);
+                errCodeRet.ThrowIfUnsuccessful();
+                callbackLifecycle.Finish(contextHandle);
+                return Reify(contextHandle);
+            }
+            catch
+            {
+                callbackLifecycle.Dispose();
+                throw;
+            }
         }
 
-        private static void* MakeErrorCallbackPtr(Action<string>? callback)
+        private class ErrorCallbackLifecycle : IDisposable
         {
-            if (callback == null) return null;
+            private readonly Action<string>? callback;
+            private GCHandle callbackHandle;
+            private readonly ErrorDelegate errorDelegate;
+            private readonly DestructorDelegate destructorDelegate;
 
-            void ErrorCallback(byte* errorInfo, void* prInfo, nuint cb, void* userData)
+            public ErrorCallbackLifecycle(Action<string>? callback)
             {
+                this.callback = callback;
+                errorDelegate = ErrorCallback;
+                destructorDelegate = DestructorCallback;
+                if (callback is not null) callbackHandle = GCHandle.Alloc(this);
+            }
+
+            public void* MakeErrorCallbackPtr()
+            {
+                if (callback is null) return null;
+                return (void*)Marshal.GetFunctionPointerForDelegate(errorDelegate);
+            }
+
+            public void Finish(Handle<Context> handle)
+            {
+                if (callback is null) return;
+
+                try
+                {
+                    var errCodeRet = OpenCLNative.SetContextDestructorCallback(
+                        handle,
+                        (void*)Marshal.GetFunctionPointerForDelegate(destructorDelegate),
+                        null);
+                    errCodeRet.ThrowIfUnsuccessful();
+                }
+                catch
+                {
+                    OpenCLNative.ReleaseContext(handle);
+                    throw;
+                }
+            }
+
+            private delegate void ErrorDelegate(byte* errorInfo, void* prInfo, nuint cb, void* userData);
+            private delegate void DestructorDelegate(Handle<Context> handle, void* _);
+
+            private void ErrorCallback(byte* errorInfo, void* prInfo, nuint cb, void* userData)
+            {
+                if (callback is null) return;
                 try
                 {
                     var length = 0;
@@ -124,7 +183,12 @@ namespace Foundation.OpenCL
                 }
             }
 
-            return (void*)Marshal.GetFunctionPointerForDelegate(ErrorCallback);
+            private void DestructorCallback(Handle<Context> handle, void* _) => Dispose();
+
+            public void Dispose()
+            {
+                if (callbackHandle.IsAllocated) callbackHandle.Free();
+            }
         }
 
         #endregion

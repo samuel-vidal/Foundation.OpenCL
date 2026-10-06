@@ -19,10 +19,12 @@ namespace Foundation.OpenCL.Tests
                 var name = platform.GetStringInfo(PlatformInfo.Name);
                 var vendor = platform.GetStringInfo(PlatformInfo.Vendor);
                 var version = platform.GetStringInfo(PlatformInfo.Version);
+                var extensions = platform.GetStringInfo(PlatformInfo.Extensions);
 
                 Console.WriteLine($"  Platform: {name}");
                 Console.WriteLine($"  Vendor: {vendor}");
                 Console.WriteLine($"  Version: {version}");
+                Console.WriteLine($"  Extensions: {extensions}");
 
                 // Check what devices each platform offers
                 var devices = platform.GetDevices(DeviceType.All);
