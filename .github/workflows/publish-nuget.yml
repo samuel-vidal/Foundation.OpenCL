@@ -1,7 +1,5 @@
 name: NuGet Publish Workflow
 
-# 
-
 # Defines the triggers for this workflow
 on:
   # 1. Automatic Trigger (Recommended): Runs when a new tag like 'v1.2.3' is pushed.
@@ -16,20 +14,22 @@ on:
       version:
         description: 'Version to publish (e.g., 1.0.1 or 1.0.1-preview)'
         required: true
-        
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        # Use the .NET version your project targets
-        dotnet-version: '9.0.x' 
+        dotnet-version: '9.0.x'
 
     # --- Determine the Package Version ---
     - name: Get Version from Tag or Manual Input
@@ -46,16 +46,21 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
         fi
         echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_OUTPUT
-            
-        
+
     - name: Restore dependencies
       run: dotnet restore
-      
+
     - name: Build project
       run: dotnet build --configuration Release
-      
+
     - name: Build and Pack the NuGet package
       run: dotnet pack --configuration Release --no-build --output ./nupkg /p:Version=${{ steps.get_version.outputs.PACKAGE_VERSION }}
-      
+
+    - name: NuGet login (OIDC)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: Samuel-Vidal
+
     - name: Publish to NuGet.org
-      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --skip-duplicate
