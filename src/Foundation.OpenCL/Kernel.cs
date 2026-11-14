@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Foundation.OpenCL
@@ -171,6 +172,58 @@ namespace Foundation.OpenCL
             return true;
         }
 
+        public T GetWorkGroupInfo<T>(Device device, KernelWorkGroupInfo paramName) where T : unmanaged
+        {
+            T value = default;
+            OpenCLNative.GetKernelWorkGroupInfo(
+                Handle,
+                device.Handle,
+                paramName,
+                (nuint)sizeof(T),
+                &value,
+                out _).ThrowIfUnsuccessful();
+
+            return value;
+        }
+
+        public T GetSubGroupInfo<T>(Device device, KernelSubGroupInfo paramName) where T : unmanaged
+        {
+            T value = default;
+            OpenCLNative.GetKernelSubGroupInfo(
+                Handle,
+                device.Handle,
+                paramName,
+                0,
+                null,
+                (nuint)sizeof(T),
+                &value,
+                out _).ThrowIfUnsuccessful();
+
+            return value;
+        }
+
+        public T GetSubGroupInfo<T, P>(Device device, KernelSubGroupInfo paramName, params ReadOnlySpan<P> inputValue)
+            where T : unmanaged
+            where P : unmanaged
+        {
+            T value = default;
+            fixed (P* pInput = inputValue)
+            {
+                OpenCLNative.GetKernelSubGroupInfo(
+                    Handle,
+                    device.Handle,
+                    paramName,
+                    (nuint)(inputValue.Length * sizeof(P)),
+                    pInput,
+                    (nuint)sizeof(T),
+                    &value,
+                    out _).ThrowIfUnsuccessful();
+            }
+
+            return value;
+        }
+
+
         #endregion
 
         public Kernel Clone()
@@ -187,5 +240,44 @@ namespace Foundation.OpenCL
             => OpenCLNative.GetKernelInfo(Handle, paramName, paramValueSize, paramValue, out paramValueSizeRet).ThrowIfUnsuccessful();
 
         public static Kernel Reify(Handle<Kernel> handle) => new(handle);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly record struct Dim3(nuint X, nuint Y = 1, nuint Z = 1);
+
+    public static class KernelExtensions
+    {
+        public static Dim3 GetCompileWorkGroupSize(this Kernel kernel, Device device)
+            => kernel.GetWorkGroupInfo<Dim3>(device, KernelWorkGroupInfo.CompileWorkGroupSize);
+
+        public static nuint GetMaxWorkGroupSize(this Kernel kernel, Device device)
+            => kernel.GetWorkGroupInfo<nuint>(device, KernelWorkGroupInfo.WorkGroupSize);
+
+        public static ulong GetLocalMemSize(this Kernel kernel, Device device)
+            => kernel.GetWorkGroupInfo<ulong>(device, KernelWorkGroupInfo.LocalMemSize);
+
+        public static nuint GetPreferredWorkGroupSizeMultiple(this Kernel kernel, Device device)
+            => kernel.GetWorkGroupInfo<nuint>(device, KernelWorkGroupInfo.PreferredWorkGroupSizeMultiple);
+
+        public static ulong GetPrivateMemSize(this Kernel kernel, Device device)
+            => kernel.GetWorkGroupInfo<ulong>(device, KernelWorkGroupInfo.PrivateMemSize);
+
+        public static ulong GetSpillMemSizeIntel(this Kernel kernel, Device device)
+            => kernel.GetWorkGroupInfo<ulong>(device, KernelWorkGroupInfo.SpillMemSizeIntel);
+
+        public static nuint GetMaxNumSubGroups(this Kernel kernel, Device device)
+            => kernel.GetSubGroupInfo<nuint>(device, KernelSubGroupInfo.MaxNumSubGroups);
+
+        public static nuint GetCompileNumSubGroups(this Kernel kernel, Device device)
+            => kernel.GetSubGroupInfo<nuint>(device, KernelSubGroupInfo.CompileNumSubGroups);
+
+        public static nuint GetCompileSubGroupSizeIntel(this Kernel kernel, Device device)
+            => kernel.GetSubGroupInfo<nuint>(device, KernelSubGroupInfo.CompileSubGroupSizeIntel);
+
+        public static nuint GetMaxSubGroupSizeForNdRange(this Kernel kernel, Device device, params ReadOnlySpan<nuint> localWorkSize)
+            => kernel.GetSubGroupInfo<nuint, nuint>(device, KernelSubGroupInfo.MaxSubGroupSizeForNdrange, localWorkSize);
+
+        public static nuint GetSubGroupCountForNdRange(this Kernel kernel, Device device, params ReadOnlySpan<nuint> localWorkSize)
+            => kernel.GetSubGroupInfo<nuint, nuint>(device, KernelSubGroupInfo.SubGroupCountForNdrange, localWorkSize);
     }
 }
